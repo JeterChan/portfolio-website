@@ -16,7 +16,7 @@
 
 | 變更 | 狀態 | 進度 | 說明 |
 |---|---|---|---|
-| `create-architecture-portfolio-site` | 已上線，收尾中 | 見下方 | 網站本體、內容、部署 |
+| `create-architecture-portfolio-site` | 已上線、已歸檔 | 47/47 | 網站本體、內容、部署 |
 | `add-motion-and-uniform-covers` | 已上線、已歸檔 | 32/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
 | `refine-project-page-fidelity-and-motion` | 已上線、已歸檔 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
 | `replace-loupe-with-animated-cursor` | 已上線、已歸檔 | 13/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
@@ -31,10 +31,10 @@
 - PDF 作品集壓縮為 8.1MB 並提供下載
 - 部署至 Vercel，正式網址可正常瀏覽（首頁、專案頁、About、404、sitemap、PDF 下載已確認）
 
-未完成：
-- 用真實內容重跑效能與無障礙驗證（Lighthouse）
-- 確認 Vercel 的 preview 部署，以及建置失敗時正式網站維持上一版
-- 歸檔這個 OpenSpec 變更
+收尾（2026-09-29）：
+- 建置失敗驗證：以暫時分支推送錯誤內容，Vercel 建置失敗，production 維持上一版（`36cdcd1`），測試後已刪除分支
+- 用真實內容重跑第 9 節：Lighthouse 行動版首頁 99、專案頁 98–100、CLS 0；正式 sitemap 與 canonical 使用正式網址；每頁有 title／description，專案頁有 og:image；放入 `index.zh.md` 不影響英文頁
+- 已歸檔，規格併入 `openspec/specs/`
 
 ## 待決定事項
 
@@ -105,5 +105,7 @@ OpenSpec：`openspec/changes/replace-loupe-with-animated-cursor/`（proposal、d
 
 ## 下一步
 
-1. `create-architecture-portfolio-site` 收尾：用真實內容重跑 Lighthouse、確認建置失敗時正式網站維持上一版，完成後歸檔。
-2. 前 4 個專案年份仍為 `TBC`，待擁有者提供。
+目前沒有進行中的變更，所有 OpenSpec 變更都已歸檔。
+
+待擁有者提供：
+- 前 4 個專案的年份（目前顯示 `TBC`，也就是 To Be Confirmed）

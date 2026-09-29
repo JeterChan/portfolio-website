@@ -66,7 +66,7 @@
 
 - [x] 10.1 擁有者建立 GitHub 與 Vercel 帳號；建立 GitHub repository 並推送
 - [x] 10.2 Vercel 匯入 repository（Astro preset），設定專案名稱決定 `*.vercel.app` 子網域
-- [ ] 10.3 驗證 production 網址、preview 分支部署、建置失敗時 production 不變
+- [x] 10.3 驗證 production 網址、preview 分支部署、建置失敗時 production 不變（2026-09-29：以暫時分支推送錯誤內容，Vercel 建置失敗，production 維持 `36cdcd1`，測試後刪除分支）
 - [x] 10.4 撰寫 `README.md`（中文）：如何新增專案、區塊語法速查、如何請 Claude 部署
 
 ## 11. 真實內容（PDF 到位後）
@@ -74,4 +74,4 @@
 - [x] 11.1 確認 PDF 與原始圖檔：用 `pdfimages`/`pdftoppm`/文字擷取拆出素材到暫存資料夾
 - [x] 11.2 依 PDF 建立各專案資料夾與 `index.en.md` 初稿，擁有者確認文字與圖序
 - [x] 11.3 壓縮 PDF 作品集（< 20MB）放入 `public/portfolio.pdf`
-- [ ] 11.4 移除佔位內容、填入真實 profile，重跑第 9 節驗證後部署
+- [x] 11.4 移除佔位內容、填入真實 profile，重跑第 9 節驗證後部署（Lighthouse 行動版首頁 99、專案頁 98–100、CLS 0；sitemap／meta、鍵盤、語系隔離皆通過）
