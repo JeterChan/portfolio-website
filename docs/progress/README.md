@@ -18,8 +18,8 @@
 |---|---|---|---|
 | `create-architecture-portfolio-site` | 已上線，收尾中 | 見下方 | 網站本體、內容、部署 |
 | `add-motion-and-uniform-covers` | 實作完成；預覽回饋後部分需求由下一個變更取代 | 30/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
-| `refine-project-page-fidelity-and-motion` | 實作完成；放大鏡將由下一個變更取代 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
-| `replace-loupe-with-animated-cursor` | OpenSpec 已完成，等待擁有者確認 | 0/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
+| `refine-project-page-fidelity-and-motion` | 實作完成；放大鏡已由下一個變更取代 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
+| `replace-loupe-with-animated-cursor` | 實作完成，等待擁有者在預覽網址確認 | 13/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
 
 ## create-architecture-portfolio-site
 
@@ -91,7 +91,14 @@ OpenSpec：`openspec/changes/refine-project-page-fidelity-and-motion/`（proposa
 
 OpenSpec：`openspec/changes/replace-loupe-with-animated-cursor/`（proposal、design、1 份 spec、tasks 共 13 項）。
 
+實作（分支 `feat/motion-and-covers`，commit `a1c2586`）：
+- 圖面上：系統游標隱藏，小圓點放大成 72px 藍色空心圓，圓心「+」、下方「Enlarge」；帶輕微延遲跟隨；按下微縮；滑出縮回淡出
+- 移除放大鏡與藍色 Enlarge 方塊；所有圖面使用相同游標
+- 驗證：游標位置與滑鼠一致、離開圖面即消失、點擊開啟全螢幕檢視時收起；觸控裝置不建立游標；減少動態時直接跟隨；Lighthouse 專案頁 Performance 100、CLS 0
+
+預覽網址：https://hung-yung-crnqhrsr8-jeterchans-projects.vercel.app
+
 ## 下一步
 
-1. 擁有者確認 `replace-loupe-with-animated-cursor`，確認後實作並提供新的預覽網址。
+1. 擁有者在最新預覽網址確認三個變更（含首頁 5 張封面裁切）。
 2. 預覽確認後合併 `feat/motion-and-covers` 到 `main`（三個變更一起上線），並歸檔 OpenSpec 變更。
