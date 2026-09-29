@@ -8,7 +8,7 @@
 - [x] 2.1 content schema 新增選填 `coverPosition`（驗證為有效的 object-position 值）
 - [x] 2.2 ProjectCard 改為 3:2 固定框、`object-fit: cover`，高度 `clamp(14rem, 40svh, 24rem)`；調整 `widths`／`sizes`
 - [x] 2.3 手機版 3:2 滿寬
-- [ ] 2.4 截圖 5 張封面的裁切結果，請擁有者確認；依需要設定 `coverPosition`
+- [x] 2.4 截圖 5 張封面的裁切結果，請擁有者確認；依需要設定 `coverPosition`
 
 ## 3. 首頁開場
 
@@ -52,4 +52,4 @@
 - [x] 8.3 Lighthouse 行動版：首頁與一個專案頁 Performance ≥ 90、CLS < 0.1
 - [x] 8.4 鍵盤操作流程與手機版檢查
 - [x] 8.5 推送分支，將 Vercel preview 網址交給擁有者確認
-- [ ] 8.6 擁有者確認後合併到 `main`，更新 `docs/progress`
+- [x] 8.6 擁有者確認後合併到 `main`，更新 `docs/progress`

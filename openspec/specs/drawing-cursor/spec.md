@@ -1,0 +1,53 @@
+# drawing-cursor Specification
+
+## Purpose
+TBD - created by archiving change replace-loupe-with-animated-cursor. Update Purpose after archive.
+## Requirements
+### Requirement: 圖面動畫游標
+在支援懸停的精確指標裝置上，滑鼠移到圖面時 SHALL 隱藏系統游標，改顯示一個空心圓圈游標，圓心有「+」、下方有「Enlarge」字樣；滑出圖面後 SHALL 恢復系統游標。網站其他區域 MUST NOT 使用自訂游標。
+
+#### Scenario: 滑入圖面
+- **WHEN** 桌機訪客將滑鼠移到任一張圖面上
+- **THEN** 系統游標消失，出現帶「+」與「Enlarge」的圓圈游標
+
+#### Scenario: 滑出圖面
+- **WHEN** 滑鼠離開圖面
+- **THEN** 圓圈游標消失，恢復系統游標
+
+#### Scenario: 其他區域
+- **WHEN** 滑鼠位於文字、首頁卡片或導覽上
+- **THEN** 顯示系統游標，沒有自訂游標
+
+### Requirement: 游標動畫
+圓圈游標 SHALL 以從小圓點放大的方式出現、以縮回的方式消失，並以輕微延遲平滑跟隨滑鼠；按下滑鼠時 SHALL 微縮，放開後恢復。
+
+#### Scenario: 進場
+- **WHEN** 滑鼠進入圖面
+- **THEN** 游標從小圓點放大成完整圓圈，「+」與「Enlarge」隨後淡入
+
+#### Scenario: 跟隨
+- **WHEN** 滑鼠在圖面上移動
+- **THEN** 圓圈平滑追上滑鼠位置，停止移動後停在游標處
+
+#### Scenario: 按下
+- **WHEN** 訪客在圖面上按下滑鼠
+- **THEN** 圓圈微縮，並開啟全螢幕放大檢視
+
+### Requirement: 所有圖面一致
+所有圖面 SHALL 使用相同的游標提示，不因原圖解析度而改變；圖面上 MUST NOT 再出現放大鏡。
+
+#### Scenario: 高解析與低解析圖面
+- **WHEN** 滑鼠依序移到 4000px 圖版與 937px 平面圖
+- **THEN** 兩者都顯示相同的圓圈游標，沒有放大鏡
+
+### Requirement: 觸控、鍵盤與減少動態
+觸控裝置 MUST NOT 建立自訂游標；鍵盤操作不受影響。開啟減少動態時游標 SHALL 仍顯示，但直接跟隨滑鼠，不做縮放過渡與延遲。
+
+#### Scenario: 觸控裝置
+- **WHEN** 手機訪客點擊圖面
+- **THEN** 直接開啟全螢幕檢視，沒有自訂游標
+
+#### Scenario: 減少動態
+- **WHEN** 開啟減少動態的桌機訪客滑到圖面上
+- **THEN** 圓圈游標直接出現在滑鼠位置並即時跟隨，沒有放大或延遲效果
+

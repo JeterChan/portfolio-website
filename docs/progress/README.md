@@ -17,9 +17,9 @@
 | 變更 | 狀態 | 進度 | 說明 |
 |---|---|---|---|
 | `create-architecture-portfolio-site` | 已上線，收尾中 | 見下方 | 網站本體、內容、部署 |
-| `add-motion-and-uniform-covers` | 實作完成；預覽回饋後部分需求由下一個變更取代 | 30/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
-| `refine-project-page-fidelity-and-motion` | 實作完成；放大鏡已由下一個變更取代 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
-| `replace-loupe-with-animated-cursor` | 實作完成，等待擁有者在預覽網址確認 | 13/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
+| `add-motion-and-uniform-covers` | 已上線、已歸檔 | 32/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
+| `refine-project-page-fidelity-and-motion` | 已上線、已歸檔 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
+| `replace-loupe-with-animated-cursor` | 已上線、已歸檔 | 13/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
 
 ## create-architecture-portfolio-site
 
@@ -98,7 +98,12 @@ OpenSpec：`openspec/changes/replace-loupe-with-animated-cursor/`（proposal、d
 
 預覽網址：https://hung-yung-crnqhrsr8-jeterchans-projects.vercel.app
 
+## 上線紀錄
+
+- 2026-09-29：擁有者確認預覽後，`feat/motion-and-covers` 合併到 `main`（commit `4409b64`），Vercel 正式部署完成。已確認正式網站首頁封面 540×360、專案頁封面不超過原尺寸、動畫游標與閱讀進度比例尺皆生效、PDF 下載正常。
+- 三個變更已歸檔到 `openspec/changes/archive/`，規格併入 `openspec/specs/`（`drawing-loupe` 已被 `drawing-cursor` 取代，未保留在主規格中）。
+
 ## 下一步
 
-1. 擁有者在最新預覽網址確認三個變更（含首頁 5 張封面裁切）。
-2. 預覽確認後合併 `feat/motion-and-covers` 到 `main`（三個變更一起上線），並歸檔 OpenSpec 變更。
+1. `create-architecture-portfolio-site` 收尾：用真實內容重跑 Lighthouse、確認建置失敗時正式網站維持上一版，完成後歸檔。
+2. 前 4 個專案年份仍為 `TBC`，待擁有者提供。
