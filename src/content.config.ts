@@ -21,6 +21,14 @@ const projects = defineCollection({
       year: z.union([z.number().int(), z.string().min(1)]),
       cover: image(),
       coverAlt: z.string().optional(),
+      // CSS object-position for the 3:2 cover crop, e.g. "left", "30% 50%".
+      coverPosition: z
+        .string()
+        .regex(
+          /^(?:(?:left|right|top|bottom|center|-?\d+(?:\.\d+)?(?:%|px|rem))\s*){1,2}$/,
+          'coverPosition 需為位置值，例如 left、center、30% 50%',
+        )
+        .optional(),
       summary: z.string().optional(),
       studio: z.string().optional(),
       location: z.string().optional(),

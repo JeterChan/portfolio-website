@@ -15,6 +15,7 @@ export default {
   'project.next': 'Next project',
   'project.allWork': 'All work',
   'project.enlarge': 'Enlarge drawing',
+  'project.enlargeCursor': 'Enlarge',
   'about.title': 'About',
   'about.contact': 'Contact',
   'pdf.download': 'Download portfolio',

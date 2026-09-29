@@ -2,15 +2,30 @@
 import Base from '../layouts/Base.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { getProjects } from '../lib/projects';
+import { getEntry } from 'astro:content';
 import { useTranslations } from '../i18n';
 
 const lang = 'en';
 const t = useTranslations(lang);
 const projects = await getProjects(lang);
+const name = (await getEntry('profile', lang))?.data.name ?? '';
+// First guess at the text width (Archivo wide, font-size 100); refined in the browser.
+const nameWidth = Math.round(name.length * 72);
 ---
 
 <Base lang={lang} section="work" fullBleed>
-  <h1 class="visually-hidden">{t('home.title')}</h1>
+  <script
+    slot="head"
+    is:inline
+    set:html={`try{var m=matchMedia('(prefers-reduced-motion: no-preference)').matches;if(m&&!sessionStorage.getItem('intro-seen')){document.documentElement.dataset.intro='play';sessionStorage.setItem('intro-seen','1')}}catch(e){}`}
+  />
+  <h1 class="visually-hidden">{name}: {t('home.title')}</h1>
+  <div class="home">
+  <div class="name-wrap">
+    <svg class="name" role="img" aria-label={name} viewBox={`0 -80 ${nameWidth} 100`} data-name>
+      <text x="0" y="0">{name}</text>
+    </svg>
+  </div>
   <div class="gallery" data-gallery>
     <ol class="track" data-track>
       {projects.map((project, i) => <ProjectCard project={project} index={i} priority={i === 0} />)}
@@ -39,12 +54,75 @@ const projects = await getProjects(lang);
       </nav>
     )
   }
+  </div>
 </Base>
 
 <style>
   .gallery {
-    --card-h: clamp(14rem, calc(100svh - 17rem), 56rem);
+    --card-h: clamp(14rem, 40svh, 24rem);
     padding: 1.5rem var(--gutter) 2rem;
+  }
+
+  /* Name at the top, the work resting along the bottom of the viewport. */
+  .home {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100svh - var(--header-h));
+  }
+
+  .gallery {
+    margin-top: auto;
+  }
+
+  .name-wrap {
+    padding: clamp(1rem, 4svh, 3rem) var(--gutter) 0;
+  }
+
+  .name {
+    display: block;
+    height: clamp(2.75rem, 1rem + 7vw, 7rem);
+    width: auto;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .name text {
+    font-family: var(--font-display);
+    font-size: 100px;
+    font-weight: var(--display-weight);
+    font-variation-settings: 'wdth' var(--wide);
+    letter-spacing: -0.01em;
+    fill: var(--ink);
+    stroke: var(--ink);
+    stroke-width: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(:root[data-intro='play']) .name text {
+      stroke-width: 1.2;
+      stroke-dasharray: 900;
+      animation:
+        name-draw 1.2s var(--ease-in-out) both,
+        name-fill 0.5s 1s var(--ease-out) both;
+    }
+  }
+
+  @keyframes name-draw {
+    from {
+      stroke-dashoffset: 900;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes name-fill {
+    from {
+      fill: transparent;
+    }
+    to {
+      fill: var(--ink);
+    }
   }
 
   .track {
@@ -127,6 +205,21 @@ const projects = await getProjects(lang);
       pointer-events: none;
     }
 
+    @supports (animation-timeline: scroll()) {
+      :global(main) {
+        timeline-scope: --gallery;
+      }
+
+      .gallery {
+        scroll-timeline: --gallery inline;
+      }
+
+      .scalebar-marker {
+        animation: scalebar-marker linear both;
+        animation-timeline: --gallery;
+      }
+    }
+
     .scalebar-ticks {
       display: flex;
       justify-content: space-between;
@@ -146,7 +239,26 @@ const projects = await getProjects(lang);
   }
 </style>
 
+<style>
+  @keyframes scalebar-marker {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(calc(min(24rem, 40vw) - 2px - 50%));
+    }
+  }
+</style>
+
 <script>
+  // Fit the name's viewBox to the rendered text once the web font is ready.
+  const nameSvg = document.querySelector<SVGSVGElement>('[data-name]');
+  const fitName = () => {
+    const box = nameSvg?.querySelector('text')?.getBBox();
+    if (nameSvg && box && box.width) nameSvg.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
+  };
+  document.fonts.ready.then(fitName);
+
   const gallery = document.querySelector<HTMLElement>('[data-gallery]');
   const scalebar = document.querySelector<HTMLElement>('[data-scalebar]');
   const desktop = window.matchMedia('(min-width: 768px)');

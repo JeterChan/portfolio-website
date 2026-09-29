@@ -8,14 +8,16 @@ interface Props {
   caption?: string;
   sizes: string;
   class?: string;
+  /** Position in a row, used to stagger the scroll reveal. */
+  n?: number;
 }
 
-const { image, alt, caption, sizes, class: className } = Astro.props;
+const { image, alt, caption, sizes, class: className, n = 0 } = Astro.props;
 const widths = [480, 800, 1200, 1600, 2000, 2600].filter((w) => w <= image.width);
 if (!widths.length) widths.push(image.width);
 ---
 
-<figure class:list={['figure', className]} style={`--natural-width: ${image.width}px`}>
+<figure class:list={['figure', 'reveal', className]} style={`--natural-width: ${image.width}px; --n: ${n}`}>
   <Picture src={image} alt={alt} formats={['avif', 'webp']} widths={widths} sizes={sizes} loading="lazy" />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>

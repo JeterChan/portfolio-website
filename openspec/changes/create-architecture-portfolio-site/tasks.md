@@ -64,8 +64,8 @@
 
 ## 10. 部署
 
-- [ ] 10.1 擁有者建立 GitHub 與 Vercel 帳號；建立 GitHub repository 並推送
-- [ ] 10.2 Vercel 匯入 repository（Astro preset），設定專案名稱決定 `*.vercel.app` 子網域
+- [x] 10.1 擁有者建立 GitHub 與 Vercel 帳號；建立 GitHub repository 並推送
+- [x] 10.2 Vercel 匯入 repository（Astro preset），設定專案名稱決定 `*.vercel.app` 子網域
 - [ ] 10.3 驗證 production 網址、preview 分支部署、建置失敗時 production 不變
 - [x] 10.4 撰寫 `README.md`（中文）：如何新增專案、區塊語法速查、如何請 Claude 部署
 

@@ -13,7 +13,7 @@ const columns = images.length;
 
 <figure class="row" style={`--columns: ${columns}`}>
   <div class="row-images">
-    {images.map((img) => <Figure image={img.image} alt={img.alt} sizes={`(max-width: 767px) 100vw, ${Math.round(90 / columns)}vw`} />)}
+    {images.map((img, n) => <Figure image={img.image} alt={img.alt} n={n} sizes={`(max-width: 767px) 100vw, ${Math.round(90 / columns)}vw`} />)}
   </div>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>

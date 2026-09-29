@@ -30,6 +30,13 @@
   --gutter: clamp(1rem, 0.5rem + 2vw, 2.5rem);
   --measure: 36em;
   --header-h: 4rem;
+
+  /* Motion. Every animation lives inside prefers-reduced-motion: no-preference. */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-short: 200ms;
+  --dur-med: 350ms;
+  --dur-long: 700ms;
 }
 
 *,
@@ -134,5 +141,61 @@ a:hover {
     scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* Page transitions: cross-document View Transitions (no-op where unsupported). */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-group(*) {
+    animation-duration: var(--dur-med);
+    animation-timing-function: var(--ease-out);
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--dur-med);
+  }
+}
+
+/* Scroll reveal, like a sheet of tracing paper lifted from top to bottom. */
+@keyframes reveal-sheet {
+  from {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(24px);
+  }
+  to {
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+
+@keyframes reveal-text {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-sheet linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--n, 0) * 8%) entry calc(70% + var(--n, 0) * 8%);
+    }
+
+    .reveal-text {
+      animation: reveal-text linear both;
+      animation-timeline: view();
+      animation-range: entry 10% entry 80%;
+    }
   }
 }

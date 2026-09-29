@@ -20,13 +20,14 @@ const zoom = await getImage({ src: image, width: zoomWidth, format: 'webp', qual
 const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
 ---
 
-<figure class="drawing">
+<figure class="drawing reveal">
   <a
     class="drawing-link"
     href={zoom.src}
     data-pswp-width={zoomWidth}
     data-pswp-height={zoomHeight}
     aria-label={`${t('project.enlarge')}: ${caption ?? alt}`}
+    data-cursor-label={t('project.enlargeCursor')}
   >
     <Picture src={image} alt={alt} formats={['webp']} widths={widths.length ? widths : [image.width]} sizes="(max-width: 767px) 100vw, 90vw" loading="lazy" />
   </a>
@@ -42,8 +43,43 @@ const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
   }
 
   .drawing-link {
+    position: relative;
     display: block;
     cursor: zoom-in;
+  }
+
+  /* Blue-pencil frame traced edge by edge on hover. */
+  .drawing-link::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--accent), var(--accent)) left top / 0 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) right top / 2px 0 no-repeat,
+      linear-gradient(var(--accent), var(--accent)) right bottom / 0 2px no-repeat,
+      linear-gradient(var(--accent), var(--accent)) left bottom / 2px 0 no-repeat;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .drawing-link:hover::after,
+    .drawing-link:focus-visible::after {
+      background-size:
+        100% 2px,
+        2px 100%,
+        100% 2px,
+        2px 100%;
+    }
+
+    .drawing-link {
+      cursor: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .drawing-link::after {
+      transition: background-size var(--dur-long) var(--ease-in-out);
+    }
   }
 
   .drawing :global(img) {
@@ -76,11 +112,58 @@ const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
     secondaryZoomLevel: 1,
     maxZoomLevel: 3,
     showHideAnimationType: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'zoom',
+    showAnimationDuration: 350,
+    hideAnimationDuration: 300,
+    easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
   });
   lightbox.init();
+
+  // "Enlarge" label that follows the pointer over drawings (mouse and trackpad only).
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const label = document.createElement('div');
+    label.className = 'cursor-label';
+    label.setAttribute('aria-hidden', 'true');
+    document.body.append(label);
+
+    document.querySelectorAll<HTMLElement>('a.drawing-link').forEach((link) => {
+      link.addEventListener('pointerenter', () => {
+        label.textContent = link.dataset.cursorLabel ?? '';
+        label.classList.add('is-visible');
+      });
+      link.addEventListener('pointerleave', () => label.classList.remove('is-visible'));
+      link.addEventListener('pointermove', (event) => {
+        label.style.transform = `translate(${event.clientX + 14}px, ${event.clientY + 14}px)`;
+      });
+      link.addEventListener('click', () => label.classList.remove('is-visible'));
+    });
+  }
 </script>
 
 <style is:global>
+  .cursor-label {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    padding: 0.3rem 0.55rem;
+    background: var(--accent);
+    color: #fff;
+    font-size: var(--step--1);
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .cursor-label.is-visible {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor-label {
+      transition: opacity var(--dur-short) var(--ease-out);
+    }
+  }
+
   .pswp {
     --pswp-bg: #fff;
     --pswp-icon-color: #000;

@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { getImage } from 'astro:assets';
+import { Picture, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Figure from '../../components/blocks/Figure.astro';
 import Drawing from '../../components/blocks/Drawing.astro';
@@ -44,15 +44,37 @@ const facts = [
   [t('project.collaborators'), collaborators],
 ].filter((fact): fact is [string, string] => Boolean(fact[1]));
 
+const cover = data.cover;
+const heroWidths = [...new Set([800, 1200, 1600, 2000, 2600].filter((w) => w < cover.width).concat(Math.min(cover.width, 2600)))];
 const og = await getImage({ src: data.cover, width: 1200, format: 'jpg', quality: 80 });
 const showNeighbours = previous.slug !== project.slug;
 ---
 
 <Base lang={lang} section="work" title={data.title} description={data.summary} ogImage={og.src}>
+  <section class="hero" aria-labelledby="project-title">
+    <div class="hero-sticky">
+      <div class="hero-media" style={`view-transition-name: cover-${project.slug}`}>
+        <Picture
+          src={cover}
+          alt={data.coverAlt ?? data.title}
+          formats={['avif', 'webp']}
+          widths={heroWidths}
+          sizes="100vw"
+          priority
+          class="hero-image"
+          style={data.coverPosition ? `object-position: ${data.coverPosition}` : undefined}
+          pictureAttributes={{ class: 'hero-picture' }}
+        />
+      </div>
+      <div class="hero-caption">
+        <h1 id="project-title">{data.title}</h1>
+        {data.summary && <p class="summary">{data.summary}</p>}
+      </div>
+    </div>
+  </section>
+
   <article class="project">
     <header class="title-block">
-      <h1>{data.title}</h1>
-      {data.summary && <p class="summary">{data.summary}</p>}
       <dl class="facts">
         {
           facts.map(([label, value]) => (
@@ -70,7 +92,7 @@ const showNeighbours = previous.slug !== project.slug;
         blocks.map((block) => {
           switch (block.type) {
             case 'text':
-              return <div class="prose block-text" set:html={block.html} />;
+              return <div class="prose block-text reveal-text" set:html={block.html} />;
             case 'full':
               return <Figure image={block.image} alt={block.alt} caption={block.caption} sizes="100vw" class="block-full" />;
             case 'drawing':
@@ -107,6 +129,101 @@ const showNeighbours = previous.slug !== project.slug;
 </Base>
 
 <style>
+  /* Hero: the cover, shrinking as the page scrolls (Apple-style scroll-linked). */
+  .hero-media {
+    aspect-ratio: 3 / 2;
+    background: var(--rule);
+  }
+
+  @media (min-width: 768px) {
+    .hero-media {
+      aspect-ratio: auto;
+      height: 70svh;
+    }
+  }
+
+  .hero :global(.hero-picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .hero-caption {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(2rem, 5vw, 4rem) var(--gutter) 0;
+  }
+
+  @media (min-width: 768px) {
+    .hero-caption {
+      grid-template-columns: 7fr 5fr;
+      align-items: end;
+      column-gap: clamp(2rem, 5vw, 5rem);
+    }
+  }
+
+  /* Scroll-linked hero on desktop only: phones keep the static 3:2 cover. */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    @supports (animation-timeline: view()) {
+      .hero {
+        height: 170svh;
+        view-timeline: --hero block;
+      }
+
+      .hero-sticky {
+        position: sticky;
+        top: 0;
+        height: 100svh;
+        overflow: hidden;
+      }
+
+      .hero-media {
+        position: absolute;
+        inset: 0;
+        height: auto;
+        transform-origin: 50% 0;
+        animation: hero-shrink linear both;
+        animation-timeline: --hero;
+        animation-range: contain 0% contain 80%;
+      }
+
+      .hero-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 5svh;
+        padding-top: 0;
+        animation: hero-caption linear both;
+        animation-timeline: --hero;
+        animation-range: contain 30% contain 70%;
+      }
+    }
+  }
+
+  @keyframes hero-shrink {
+    to {
+      transform: translateY(4svh) scale(0.74);
+    }
+  }
+
+  @keyframes hero-caption {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   .project {
     padding: clamp(2rem, 6vw, 5rem) var(--gutter) 0;
   }
@@ -119,12 +236,12 @@ const showNeighbours = previous.slug !== project.slug;
   }
 
   h1 {
-    font-size: var(--display-size);
+    font-size: clamp(2rem, 1rem + 3vw, 3.75rem);
     font-family: var(--font-display);
     font-variation-settings: 'wdth' var(--wide);
     font-weight: var(--display-weight);
     letter-spacing: var(--display-tracking);
-    max-width: 14ch;
+    max-width: 18ch;
   }
 
   .summary {

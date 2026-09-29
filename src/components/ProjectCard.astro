@@ -12,26 +12,31 @@ interface Props {
 }
 
 const { project, index, priority = false } = Astro.props;
-const { title, year, studio, cover, coverAlt } = project.entry.data;
-const aspect = cover.width / cover.height;
-// Cards are ~62vh tall on desktop, so their width is aspect × 62vh.
-const sizes = `(max-width: 767px) calc(100vw - 2rem), ${Math.round(aspect * 62)}vh`;
+const { title, year, studio, cover, coverAlt, coverPosition } = project.entry.data;
+
+// Every cover sits in the same 3:2 frame: clamp(21rem, 60svh, 36rem) wide on desktop.
+const widths = [...new Set([480, 800, 1200, 1600].filter((w) => w < cover.width).concat(Math.min(cover.width, 1600)))];
+const sizes = '(max-width: 767px) calc(100vw - 2rem), clamp(21rem, 60svh, 36rem)';
 ---
 
-<li class="card" data-index={index}>
+<li class="card" style={`--i: ${index}`}>
   <a href={localizePath(projectPath(project), project.lang)}>
-    <Picture
-      src={cover}
-      alt={coverAlt ?? title}
-      formats={['avif', 'webp']}
-      widths={[480, 800, 1200, 1600, 2200].filter((w) => w <= cover.width)}
-      sizes={sizes}
-      priority={priority}
-      loading={priority ? 'eager' : 'lazy'}
-      class="card-image"
-    />
+    <span class="card-frame" style={`view-transition-name: cover-${project.slug}`}>
+      <Picture
+        src={cover}
+        alt={coverAlt ?? title}
+        formats={['avif', 'webp']}
+        widths={widths}
+        sizes={sizes}
+        priority={priority}
+        loading={priority ? 'eager' : 'lazy'}
+        class="card-image"
+        style={coverPosition ? `object-position: ${coverPosition}` : undefined}
+        pictureAttributes={{ class: 'card-picture' }}
+      />
+    </span>
     <span class="card-caption">
-      <span class="card-title">{title}</span>
+      <span class="card-title"><span class="card-title-text">{title}</span></span>
       <span class="card-year">{year}</span>
       {studio && <span class="card-studio">{studio}</span>}
     </span>
@@ -44,10 +49,24 @@ const sizes = `(max-width: 767px) calc(100vw - 2rem), ${Math.round(aspect * 62)}
     text-decoration: none;
   }
 
+  .card-frame {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--rule);
+  }
+
+  .card :global(.card-picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
   .card-image {
     width: 100%;
-    height: auto;
-    background: var(--rule);
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
   }
 
   .card-caption {
@@ -65,6 +84,17 @@ const sizes = `(max-width: 767px) calc(100vw - 2rem), ${Math.round(aspect * 62)}
     line-height: 1.15;
   }
 
+  /* Underline drawn left to right on hover. */
+  .card-title-text {
+    background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
+    padding-bottom: 0.1em;
+  }
+
+  .card a:hover .card-title-text,
+  .card a:focus-visible .card-title-text {
+    background-size: 100% 1px;
+  }
+
   .card-year {
     font-variant-numeric: tabular-nums;
     color: var(--graphite);
@@ -76,31 +106,66 @@ const sizes = `(max-width: 767px) calc(100vw - 2rem), ${Math.round(aspect * 62)}
     color: var(--graphite);
   }
 
-  .card a:hover .card-title {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-  }
-
   @media (min-width: 768px) {
     .card {
       flex: none;
-      /* Caption wraps to the image width. */
-      width: min-content;
+      width: calc(var(--card-h) * 1.5);
     }
 
-    .card :global(picture),
-    .card-image {
-      max-width: none;
-    }
-
-    .card-image {
-      width: auto;
+    .card-frame {
       height: var(--card-h);
     }
+  }
 
-    .card-caption {
-      max-width: 100%;
+  @media (prefers-reduced-motion: no-preference) {
+    .card-title-text {
+      transition: background-size var(--dur-med) var(--ease-out);
+    }
+
+    /* Slightly oversized so the parallax never shows the frame edge. */
+    .card-image {
+      transform: scale(1.08);
+      transition: transform var(--dur-long) var(--ease-out);
+    }
+
+    .card a:hover .card-image {
+      transform: scale(1.12);
+    }
+
+    /* Intro: cards slide in after the name starts drawing. */
+    :global(:root[data-intro='play']) .card {
+      animation: card-in var(--dur-long) var(--ease-out) both;
+      animation-delay: calc(600ms + var(--i) * 90ms);
+    }
+  }
+
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Parallax tied to the gallery's horizontal scroll. */
+  @keyframes card-parallax {
+    from {
+      transform: translateX(-16px);
+    }
+    to {
+      transform: translateX(16px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+    @supports (animation-timeline: view()) {
+      .card :global(.card-picture) {
+        animation: card-parallax linear both;
+        animation-timeline: view(inline);
+      }
     }
   }
 </style>
