@@ -1,0 +1,244 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Figure from '../../components/blocks/Figure.astro';
+import Drawing from '../../components/blocks/Drawing.astro';
+import TextImage from '../../components/blocks/TextImage.astro';
+import Row from '../../components/blocks/Row.astro';
+import { getProjects, projectPath, type Project } from '../../lib/projects';
+import { parseBlocks } from '../../lib/blocks';
+import { localizePath, useTranslations } from '../../i18n';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects('en');
+  return projects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: {
+      project,
+      previous: projects[(i - 1 + projects.length) % projects.length],
+      next: projects[(i + 1) % projects.length],
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: Project;
+  previous: Project;
+  next: Project;
+}
+
+const { project, previous, next } = Astro.props;
+const { lang } = project;
+const t = useTranslations(lang);
+const data = project.entry.data;
+const blocks = parseBlocks(project);
+
+const collaborators = Array.isArray(data.collaborators) ? data.collaborators.join(', ') : data.collaborators;
+const facts = [
+  [t('project.year'), String(data.year)],
+  [t('project.studio'), data.studio],
+  [t('project.location'), data.location],
+  [t('project.type'), data.type],
+  [t('project.instructor'), data.instructor],
+  [t('project.collaborators'), collaborators],
+].filter((fact): fact is [string, string] => Boolean(fact[1]));
+
+const og = await getImage({ src: data.cover, width: 1200, format: 'jpg', quality: 80 });
+const showNeighbours = previous.slug !== project.slug;
+---
+
+<Base lang={lang} section="work" title={data.title} description={data.summary} ogImage={og.src}>
+  <article class="project">
+    <header class="title-block">
+      <h1>{data.title}</h1>
+      {data.summary && <p class="summary">{data.summary}</p>}
+      <dl class="facts">
+        {
+          facts.map(([label, value]) => (
+            <div>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </header>
+
+    <div class="project-body" data-project-body>
+      {
+        blocks.map((block) => {
+          switch (block.type) {
+            case 'text':
+              return <div class="prose block-text" set:html={block.html} />;
+            case 'full':
+              return <Figure image={block.image} alt={block.alt} caption={block.caption} sizes="100vw" class="block-full" />;
+            case 'drawing':
+              return <Drawing image={block.image} alt={block.alt} caption={block.caption} lang={lang} />;
+            case 'row':
+              return <Row images={block.images} caption={block.caption} />;
+            case 'text-image':
+              return <TextImage image={block.image} alt={block.alt} caption={block.caption} html={block.html} side={block.side} />;
+          }
+        })
+      }
+    </div>
+
+    <nav class="project-nav" aria-label="Projects">
+      {
+        showNeighbours && (
+          <a class="prev" href={localizePath(projectPath(previous), lang)} rel="prev">
+            <span class="nav-label">{t('project.previous')}</span>
+            <span class="nav-title">{previous.entry.data.title}</span>
+          </a>
+        )
+      }
+      <a class="all" href={localizePath('/', lang)}>{t('project.allWork')}</a>
+      {
+        showNeighbours && (
+          <a class="next" href={localizePath(projectPath(next), lang)} rel="next">
+            <span class="nav-label">{t('project.next')}</span>
+            <span class="nav-title">{next.entry.data.title}</span>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .project {
+    padding: clamp(2rem, 6vw, 5rem) var(--gutter) 0;
+  }
+
+  /* Title block: set out like the title block of a drawing sheet. */
+  .title-block {
+    display: grid;
+    gap: 1.5rem;
+    padding-bottom: clamp(2rem, 5vw, 4rem);
+  }
+
+  h1 {
+    font-size: var(--display-size);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' var(--wide);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    max-width: 14ch;
+  }
+
+  .summary {
+    max-width: 32em;
+    font-size: var(--step-1);
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    margin: 0;
+    border-top: 1px solid var(--ink);
+    border-left: 1px solid var(--ink);
+  }
+
+  .facts div {
+    padding: 0.5rem 0.75rem 0.6rem;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  dt {
+    font-size: var(--step--1);
+    color: var(--graphite);
+  }
+
+  dd {
+    margin: 0.1rem 0 0;
+  }
+
+  .project-body {
+    display: grid;
+    gap: clamp(3rem, 8vw, 7rem);
+  }
+
+  .block-text {
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  @media (min-width: 768px) {
+    .title-block {
+      grid-template-columns: 7fr 5fr;
+      align-items: end;
+      column-gap: clamp(2rem, 5vw, 5rem);
+    }
+
+    .facts {
+      grid-column: 1 / -1;
+    }
+
+    /* Text sits in the right-hand column, like notes beside a drawing. */
+    .block-text {
+      margin-left: calc(7 / 12 * 100%);
+      max-width: 28em;
+    }
+  }
+
+  .project-nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: 1rem;
+    margin-top: clamp(4rem, 10vw, 8rem);
+    padding: 1.5rem 0 3rem;
+    border-top: 1px solid var(--ink);
+  }
+
+  .project-nav a {
+    text-decoration: none;
+  }
+
+  .nav-label {
+    display: block;
+    font-size: var(--step--1);
+    color: var(--graphite);
+  }
+
+  .nav-title {
+    font-size: var(--step-1);
+    font-weight: var(--heading-weight);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' var(--wide);
+  }
+
+  .project-nav a:hover .nav-title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+
+  .all {
+    color: var(--graphite);
+    text-decoration: underline !important;
+  }
+
+  .next {
+    grid-column: 3;
+    text-align: right;
+  }
+
+  @media (max-width: 767px) {
+    .project-nav {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .all {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
+
+    .next {
+      grid-column: 2;
+    }
+  }
+</style>

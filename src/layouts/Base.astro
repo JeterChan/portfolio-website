@@ -1,0 +1,129 @@
+---
+import '../styles/global.css';
+import { getEntry } from 'astro:content';
+import { defaultLocale, localizePath, useTranslations, type Locale } from '../i18n';
+import { getPortfolioPdf } from '../lib/pdf';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  lang?: Locale;
+  /** Current section, for aria-current in the nav. */
+  section?: 'work' | 'about';
+  /** Home page fills the viewport and scrolls sideways. */
+  fullBleed?: boolean;
+}
+
+const { title, description, ogImage, lang = defaultLocale, section, fullBleed = false } = Astro.props;
+const t = useTranslations(lang);
+const profile = await getEntry('profile', lang);
+if (!profile) throw new Error(`缺少 content/profile/index.${lang}.md`);
+
+const name = profile.data.name;
+const pageTitle = title ? `${title} | ${name}` : `${name}${profile.data.role ? `, ${profile.data.role}` : ''}`;
+const metaDescription = description ?? profile.data.summary ?? '';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+const pdf = getPortfolioPdf();
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    {metaDescription && <meta name="description" content={metaDescription} />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    {metaDescription && <meta property="og:description" content={metaDescription} />}
+    <meta property="og:url" content={canonical} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+    <meta name="theme-color" content="#e9ebe8" />
+  </head>
+  <body class:list={{ 'full-bleed': fullBleed }}>
+    <a class="skip-link" href="#main">{t('nav.skip')}</a>
+    <header class="site-header">
+      <a class="site-name" href={localizePath('/', lang)}>{name}</a>
+      <nav aria-label="Main">
+        <ul>
+          <li><a href={localizePath('/', lang)} aria-current={section === 'work' ? 'page' : undefined}>{t('nav.work')}</a></li>
+          <li><a href={localizePath('/about', lang)} aria-current={section === 'about' ? 'page' : undefined}>{t('nav.about')}</a></li>
+          {
+            pdf && (
+              <li class="nav-pdf">
+                <a href={pdf.href} download>
+                  PDF <span class="nav-pdf-size">{pdf.size}</span>
+                </a>
+              </li>
+            )
+          }
+        </ul>
+      </nav>
+    </header>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    height: var(--header-h);
+    padding: 1.25rem var(--gutter) 0;
+  }
+
+  .site-name {
+    font-weight: var(--display-weight);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' var(--wide);
+    text-decoration: none;
+    letter-spacing: 0.005em;
+  }
+
+  nav ul {
+    display: flex;
+    gap: clamp(1rem, 3vw, 2rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: var(--graphite);
+  }
+
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+
+  .nav-pdf-size {
+    font-size: var(--step--1);
+  }
+
+  main:focus {
+    outline: none;
+  }
+
+  .full-bleed {
+    min-height: 100svh;
+  }
+
+  @media (max-width: 30rem) {
+    .nav-pdf-size {
+      display: none;
+    }
+  }
+</style>

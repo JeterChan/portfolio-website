@@ -1,0 +1,225 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getProjects } from '../lib/projects';
+import { useTranslations } from '../i18n';
+
+const lang = 'en';
+const t = useTranslations(lang);
+const projects = await getProjects(lang);
+---
+
+<Base lang={lang} section="work" fullBleed>
+  <h1 class="visually-hidden">{t('home.title')}</h1>
+  <div class="gallery" data-gallery>
+    <ol class="track" data-track>
+      {projects.map((project, i) => <ProjectCard project={project} index={i} priority={i === 0} />)}
+    </ol>
+  </div>
+
+  {
+    projects.length > 1 && (
+      <nav class="scalebar" aria-label={t('home.progress')} data-scalebar>
+        <div class="scalebar-bar">
+          {projects.map((project, i) => (
+            <button
+              type="button"
+              class="scalebar-segment"
+              data-target={i}
+              aria-label={`${t('home.goTo')} ${project.entry.data.title}`}
+            />
+          ))}
+          <span class="scalebar-marker" data-marker aria-hidden="true" />
+        </div>
+        <ol class="scalebar-ticks" aria-hidden="true">
+          {Array.from({ length: projects.length + 1 }, (_, i) => (
+            <li>{i}</li>
+          ))}
+        </ol>
+      </nav>
+    )
+  }
+</Base>
+
+<style>
+  .gallery {
+    --card-h: clamp(14rem, calc(100svh - 17rem), 56rem);
+    padding: 1.5rem var(--gutter) 2rem;
+  }
+
+  .track {
+    display: grid;
+    gap: 3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .scalebar {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .gallery {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      padding-bottom: 1rem;
+    }
+
+    .gallery::-webkit-scrollbar {
+      display: none;
+    }
+
+    .track {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(2rem, 4vw, 4.5rem);
+      width: max-content;
+      /* Let the last card reach the left edge. */
+      padding-right: var(--gutter);
+    }
+
+    /* Scale bar: one segment per project, marker shows scroll position. */
+    .scalebar {
+      display: block;
+      width: min(24rem, 40vw);
+      margin: 0 var(--gutter) 1.5rem;
+    }
+
+    .scalebar-bar {
+      position: relative;
+      display: flex;
+      height: 0.5rem;
+      border: 1px solid var(--ink);
+    }
+
+    .scalebar-segment {
+      flex: 1;
+      padding: 0;
+      border: 0;
+      background: var(--sheet);
+      cursor: pointer;
+    }
+
+    .scalebar-segment:nth-child(odd) {
+      background: var(--ink);
+    }
+
+    .scalebar-segment:hover {
+      background: var(--accent);
+    }
+
+    .scalebar-segment:focus-visible {
+      outline-offset: 4px;
+    }
+
+    .scalebar-marker {
+      position: absolute;
+      top: -0.7rem;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 0.35rem solid transparent;
+      border-right: 0.35rem solid transparent;
+      border-top: 0.5rem solid var(--accent);
+      transform: translateX(calc(var(--progress, 0) * (min(24rem, 40vw) - 2px) - 50%));
+      pointer-events: none;
+    }
+
+    .scalebar-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.3rem 0 0;
+      padding: 0;
+      list-style: none;
+      font-size: var(--step--1);
+      font-variant-numeric: tabular-nums;
+      color: var(--graphite);
+    }
+
+    .scalebar-ticks li {
+      width: 0;
+      display: flex;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  const gallery = document.querySelector<HTMLElement>('[data-gallery]');
+  const scalebar = document.querySelector<HTMLElement>('[data-scalebar]');
+  const desktop = window.matchMedia('(min-width: 768px)');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (gallery) {
+    const cards = Array.from(gallery.querySelectorAll<HTMLElement>('.card'));
+    const maxScroll = () => gallery.scrollWidth - gallery.clientWidth;
+    const behavior = (): ScrollBehavior => (reducedMotion.matches ? 'auto' : 'smooth');
+
+    // Vertical mouse wheel moves the gallery sideways. Horizontal trackpad
+    // gestures are left alone, and the page takes over at either end.
+    gallery.addEventListener(
+      'wheel',
+      (event) => {
+        if (!desktop.matches || event.ctrlKey) return;
+        if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+        const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+        const atStart = gallery.scrollLeft <= 0 && delta < 0;
+        const atEnd = gallery.scrollLeft >= maxScroll() - 1 && delta > 0;
+        if (atStart || atEnd) return;
+        event.preventDefault();
+        gallery.scrollLeft += delta;
+      },
+      { passive: false },
+    );
+
+    const scrollToCard = (index: number, focus = false) => {
+      const card = cards[Math.max(0, Math.min(cards.length - 1, index))];
+      if (!card) return;
+      gallery.scrollTo({ left: card.offsetLeft - gallery.offsetLeft - parseFloat(getComputedStyle(gallery).paddingLeft), behavior: behavior() });
+      if (focus) card.querySelector('a')?.focus({ preventScroll: true });
+    };
+
+    const currentIndex = () => {
+      const edge = gallery.scrollLeft;
+      let index = 0;
+      cards.forEach((card, i) => {
+        if (card.offsetLeft - gallery.offsetLeft <= edge + 40) index = i;
+      });
+      return index;
+    };
+
+    // Keyboard: arrow keys step between projects; a focused card is brought into view.
+    document.addEventListener('keydown', (event) => {
+      if (!desktop.matches || event.altKey || event.metaKey || event.ctrlKey) return;
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      const active = document.activeElement;
+      if (active && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) return;
+      event.preventDefault();
+      const focusedCard = cards.findIndex((card) => card.contains(active));
+      const from = focusedCard >= 0 ? focusedCard : currentIndex();
+      scrollToCard(from + (event.key === 'ArrowRight' ? 1 : -1), true);
+    });
+
+    gallery.addEventListener('focusin', (event) => {
+      if (!desktop.matches) return;
+      const card = (event.target as HTMLElement).closest<HTMLElement>('.card');
+      card?.scrollIntoView({ behavior: behavior(), inline: 'nearest', block: 'nearest' });
+    });
+
+    if (scalebar) {
+      const update = () => {
+        const max = maxScroll();
+        scalebar.style.setProperty('--progress', String(max > 0 ? gallery.scrollLeft / max : 0));
+      };
+      gallery.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      update();
+
+      scalebar.querySelectorAll<HTMLButtonElement>('[data-target]').forEach((button) => {
+        button.addEventListener('click', () => scrollToCard(Number(button.dataset.target)));
+      });
+    }
+  }
+</script>

@@ -1,0 +1,90 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { useTranslations, type Locale } from '../../i18n';
+
+interface Props {
+  image: ImageMetadata;
+  alt: string;
+  caption?: string;
+  lang: Locale;
+}
+
+const { image, alt, caption, lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Large version for the zoom viewer, sharp enough to read line weights.
+const zoomWidth = Math.min(image.width, 4000);
+const zoomHeight = Math.round((image.height * zoomWidth) / image.width);
+const zoom = await getImage({ src: image, width: zoomWidth, format: 'webp', quality: 90 });
+const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
+---
+
+<figure class="drawing">
+  <a
+    class="drawing-link"
+    href={zoom.src}
+    data-pswp-width={zoomWidth}
+    data-pswp-height={zoomHeight}
+    aria-label={`${t('project.enlarge')}: ${caption ?? alt}`}
+  >
+    <Picture src={image} alt={alt} formats={['webp']} widths={widths.length ? widths : [image.width]} sizes="(max-width: 767px) 100vw, 90vw" loading="lazy" />
+  </a>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .drawing {
+    margin: 0;
+    padding: clamp(0.75rem, 2vw, 2rem);
+    background: #fff;
+    border: 1px solid var(--rule);
+  }
+
+  .drawing-link {
+    display: block;
+    cursor: zoom-in;
+  }
+
+  .drawing :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    margin-top: 1rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--ink);
+    font-size: var(--step--1);
+    font-weight: var(--heading-weight);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' var(--wide);
+  }
+</style>
+
+<script>
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+  import 'photoswipe/style.css';
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: '[data-project-body]',
+    children: 'a.drawing-link',
+    pswpModule: () => import('photoswipe'),
+    bgOpacity: 1,
+    wheelToZoom: true,
+    initialZoomLevel: 'fit',
+    secondaryZoomLevel: 1,
+    maxZoomLevel: 3,
+    showHideAnimationType: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'none' : 'zoom',
+  });
+  lightbox.init();
+</script>
+
+<style is:global>
+  .pswp {
+    --pswp-bg: #fff;
+    --pswp-icon-color: #000;
+    --pswp-icon-color-secondary: #fff;
+    --pswp-icon-stroke-color: #fff;
+  }
+</style>

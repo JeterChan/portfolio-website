@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+import { useTranslations } from '../i18n';
+
+const t = useTranslations('en');
+---
+
+<Base title={t('notFound.title')}>
+  <div class="not-found">
+    <h1>{t('notFound.title')}</h1>
+    <p>{t('notFound.body')}</p>
+    <p><a href="/">{t('notFound.back')}</a></p>
+  </div>
+</Base>
+
+<style>
+  .not-found {
+    padding: clamp(3rem, 10vw, 8rem) var(--gutter);
+    max-width: 40rem;
+  }
+
+  h1 {
+    font-size: var(--step-3);
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' var(--wide);
+    margin-bottom: 1rem;
+  }
+</style>

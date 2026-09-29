@@ -1,0 +1,138 @@
+@import '@fontsource-variable/archivo/wdth.css';
+
+/* Tracing paper: cool grey sheet, ink, graphite, blue pencil. Archivo wide. */
+:root {
+  --paper: #e9ebe8;
+  --sheet: #f7f8f6;
+  --ink: #000;
+  --graphite: #50555a;
+  --rule: #b9bdba;
+  --accent: #2440c8;
+
+  --font: 'Archivo Variable', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: var(--font);
+  --wide: 125;
+  --normal: 100;
+  --display-size: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  --display-weight: 650;
+  --display-tracking: -0.01em;
+  --heading-weight: 600;
+}
+
+:root {
+  /* Type scale (1.25 minor third on 17px base). */
+  --step--1: 0.8125rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.3125rem;
+  --step-2: 1.625rem;
+  --step-3: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+
+  --gutter: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+  --measure: 36em;
+  --header-h: 4rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--step-0);
+  font-variation-settings: 'wdth' var(--normal);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: 0.5rem;
+  z-index: 100;
+  padding: 0.5rem 0.75rem;
+  background: var(--ink);
+  color: var(--sheet);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.prose {
+  max-width: var(--measure);
+}
+
+.prose h2 {
+  margin: 2.5em 0 0.75em;
+  font-size: var(--step-1);
+  font-variation-settings: 'wdth' var(--wide);
+}
+
+.prose ul {
+  padding-left: 1.1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
