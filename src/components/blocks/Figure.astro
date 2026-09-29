@@ -13,11 +13,11 @@ interface Props {
 }
 
 const { image, alt, caption, sizes, class: className, n = 0 } = Astro.props;
-const widths = [480, 800, 1200, 1600, 2000, 2600].filter((w) => w <= image.width);
-if (!widths.length) widths.push(image.width);
+// Never above the source width; always include the source width itself.
+const widths = [...new Set([480, 800, 1200, 1600, 2000, 2600].filter((w) => w < image.width).concat(Math.min(image.width, 2600)))];
 ---
 
-<figure class:list={['figure', 'reveal', className]} style={`--natural-width: ${image.width}px; --n: ${n}`}>
+<figure class:list={['figure', 'enter', className]} style={`--natural-width: ${image.width}px; --n: ${n}`}>
   <Picture src={image} alt={alt} formats={['avif', 'webp']} widths={widths} sizes={sizes} loading="lazy" />
   {caption && <figcaption>{caption}</figcaption>}
 </figure>

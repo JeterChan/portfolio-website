@@ -14,7 +14,7 @@ const { image, alt, caption, html, side } = Astro.props;
 ---
 
 <div class:list={['text-image', `text-${side}`]}>
-  <div class="prose text reveal-text" set:html={html} />
+  <div class="prose text" set:html={html} />
   <Figure image={image} alt={alt} caption={caption} sizes="(max-width: 767px) 100vw, 55vw" class="image" />
 </div>
 

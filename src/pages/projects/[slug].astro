@@ -51,34 +51,40 @@ const showNeighbours = previous.slug !== project.slug;
 ---
 
 <Base lang={lang} section="work" title={data.title} description={data.summary} ogImage={og.src}>
+  <script
+    slot="head"
+    is:inline
+    set:html={`try{if(matchMedia('(prefers-reduced-motion: no-preference)').matches&&'IntersectionObserver' in window){var r=document.documentElement;r.classList.add('js-motion');setTimeout(function(){if(!window.__motionReady)r.classList.remove('js-motion')},3000)}}catch(e){}`}
+  />
+  <div class="read-progress" aria-hidden="true" data-read-progress><span></span></div>
   <section class="hero" aria-labelledby="project-title">
-    <div class="hero-sticky">
-      <div class="hero-media" style={`view-transition-name: cover-${project.slug}`}>
-        <Picture
-          src={cover}
-          alt={data.coverAlt ?? data.title}
-          formats={['avif', 'webp']}
-          widths={heroWidths}
-          sizes="100vw"
-          priority
-          class="hero-image"
-          style={data.coverPosition ? `object-position: ${data.coverPosition}` : undefined}
-          pictureAttributes={{ class: 'hero-picture' }}
-        />
-      </div>
-      <div class="hero-caption">
-        <h1 id="project-title">{data.title}</h1>
-        {data.summary && <p class="summary">{data.summary}</p>}
-      </div>
+    <div
+      class="hero-media"
+      style={`--natural-width: ${cover.width}px; --ratio: ${(cover.width / cover.height).toFixed(4)}; view-transition-name: cover-${project.slug}`}
+    >
+      <Picture
+        src={cover}
+        alt={data.coverAlt ?? data.title}
+        formats={['avif', 'webp']}
+        widths={heroWidths}
+        sizes={`(max-width: 767px) calc(100vw - 2rem), ${cover.width}px`}
+        priority
+        class="hero-image"
+        pictureAttributes={{ class: 'hero-picture' }}
+      />
+    </div>
+    <div class="hero-caption">
+      <h1 id="project-title" data-lines>{data.title}</h1>
+      {data.summary && <p class="summary" data-lines>{data.summary}</p>}
     </div>
   </section>
 
   <article class="project">
     <header class="title-block">
-      <dl class="facts">
+      <dl class="facts" data-facts>
         {
-          facts.map(([label, value]) => (
-            <div>
+          facts.map(([label, value], i) => (
+            <div style={`--i: ${i}`}>
               <dt>{label}</dt>
               <dd>{value}</dd>
             </div>
@@ -92,7 +98,7 @@ const showNeighbours = previous.slug !== project.slug;
         blocks.map((block) => {
           switch (block.type) {
             case 'text':
-              return <div class="prose block-text reveal-text" set:html={block.html} />;
+              return <div class="prose block-text" set:html={block.html} />;
             case 'full':
               return <Figure image={block.image} alt={block.alt} caption={block.caption} sizes="100vw" class="block-full" />;
             case 'drawing':
@@ -129,17 +135,15 @@ const showNeighbours = previous.slug !== project.slug;
 </Base>
 
 <style>
-  /* Hero: the cover, shrinking as the page scrolls (Apple-style scroll-linked). */
-  .hero-media {
-    aspect-ratio: 3 / 2;
-    background: var(--rule);
+  /* Cover at its natural size or smaller, never upscaled (image-fidelity). */
+  .hero {
+    padding: clamp(1.5rem, 4vw, 3rem) var(--gutter) 0;
   }
 
-  @media (min-width: 768px) {
-    .hero-media {
-      aspect-ratio: auto;
-      height: 70svh;
-    }
+  .hero-media {
+    width: min(100%, var(--natural-width), calc(75svh * var(--ratio)));
+    aspect-ratio: var(--ratio);
+    background: var(--rule);
   }
 
   .hero :global(.hero-picture) {
@@ -151,14 +155,12 @@ const showNeighbours = previous.slug !== project.slug;
   .hero-image {
     width: 100%;
     height: 100%;
-    max-width: none;
-    object-fit: cover;
   }
 
   .hero-caption {
     display: grid;
     gap: 1rem;
-    padding: clamp(2rem, 5vw, 4rem) var(--gutter) 0;
+    padding-top: clamp(1.5rem, 4vw, 3rem);
   }
 
   @media (min-width: 768px) {
@@ -166,61 +168,6 @@ const showNeighbours = previous.slug !== project.slug;
       grid-template-columns: 7fr 5fr;
       align-items: end;
       column-gap: clamp(2rem, 5vw, 5rem);
-    }
-  }
-
-  /* Scroll-linked hero on desktop only: phones keep the static 3:2 cover. */
-  @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
-    @supports (animation-timeline: view()) {
-      .hero {
-        height: 170svh;
-        view-timeline: --hero block;
-      }
-
-      .hero-sticky {
-        position: sticky;
-        top: 0;
-        height: 100svh;
-        overflow: hidden;
-      }
-
-      .hero-media {
-        position: absolute;
-        inset: 0;
-        height: auto;
-        transform-origin: 50% 0;
-        animation: hero-shrink linear both;
-        animation-timeline: --hero;
-        animation-range: contain 0% contain 80%;
-      }
-
-      .hero-caption {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 5svh;
-        padding-top: 0;
-        animation: hero-caption linear both;
-        animation-timeline: --hero;
-        animation-range: contain 30% contain 70%;
-      }
-    }
-  }
-
-  @keyframes hero-shrink {
-    to {
-      transform: translateY(4svh) scale(0.74);
-    }
-  }
-
-  @keyframes hero-caption {
-    from {
-      opacity: 0;
-      transform: translateY(32px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
     }
   }
 
@@ -251,18 +198,133 @@ const showNeighbours = previous.slug !== project.slug;
     margin: 0;
   }
 
+  /* Grid lines drawn with pseudo-elements so they can be traced on entrance. */
   .facts {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
     margin: 0;
-    border-top: 1px solid var(--ink);
-    border-left: 1px solid var(--ink);
   }
 
   .facts div {
+    position: relative;
     padding: 0.5rem 0.75rem 0.6rem;
-    border-right: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
+  }
+
+  .facts div::before,
+  .facts div::after {
+    content: '';
+    position: absolute;
+    background: var(--ink);
+  }
+
+  /* As before: the list draws the top and left edges, each cell its bottom and right. */
+  .facts div::before {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    transform-origin: left;
+  }
+
+  .facts div::after {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    transform-origin: top;
+  }
+
+  .facts::before,
+  .facts::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    background: var(--ink);
+  }
+
+  .facts::before {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform-origin: left;
+  }
+
+  .facts::after {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    transform-origin: top;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.js-motion) .facts div::before,
+    :global(.js-motion) .facts div::after,
+    :global(.js-motion) .facts::before,
+    :global(.js-motion) .facts::after {
+      transition: transform 500ms var(--ease-in-out);
+      transition-delay: calc(var(--i, 0) * 60ms);
+    }
+
+    :global(.js-motion) .facts:not(.is-in) div::before,
+    :global(.js-motion) .facts:not(.is-in)::before {
+      transform: scaleX(0);
+    }
+
+    :global(.js-motion) .facts:not(.is-in) div::after,
+    :global(.js-motion) .facts:not(.is-in)::after {
+      transform: scaleY(0);
+    }
+
+    :global(.js-motion) .facts dt,
+    :global(.js-motion) .facts dd {
+      opacity: 0;
+      transition: opacity 500ms var(--ease-out);
+      transition-delay: calc(450ms + var(--i, 0) * 60ms);
+    }
+
+    :global(.js-motion) .facts.is-in dt,
+    :global(.js-motion) .facts.is-in dd {
+      opacity: 1;
+    }
+  }
+
+  /* Reading progress, drawn as a scale bar along the top edge. */
+  .read-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    height: 4px;
+    background: repeating-linear-gradient(90deg, rgb(0 0 0 / 0.22) 0 5%, transparent 5% 10%);
+    pointer-events: none;
+  }
+
+  .read-progress span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .read-progress span {
+      animation: read-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+
+  @keyframes read-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
   }
 
   dt {
@@ -359,3 +421,86 @@ const showNeighbours = previous.slug !== project.slug;
     }
   }
 </style>
+
+<script>
+  // Entrance motion: fade/rise once when an element enters the viewport,
+  // text line by line, and the facts table traced. Only runs with html.js-motion.
+  const root = document.documentElement;
+
+  /** Wrap each word in a span and number the visual lines it falls on. */
+  function splitLines(el: HTMLElement) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode as Text);
+    for (const node of nodes) {
+      const parts = node.textContent?.split(/(\s+)/) ?? [];
+      const fragment = document.createDocumentFragment();
+      for (const part of parts) {
+        if (!part) continue;
+        if (/^\s+$/.test(part)) {
+          fragment.append(part);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'w';
+          span.textContent = part;
+          fragment.append(span);
+        }
+      }
+      node.replaceWith(fragment);
+    }
+    let line = -1;
+    let lastTop = -Infinity;
+    el.querySelectorAll<HTMLElement>('.w').forEach((word) => {
+      const top = word.offsetTop;
+      if (top > lastTop + 2) {
+        line += 1;
+        lastTop = top;
+      }
+      word.style.setProperty('--line', String(line));
+    });
+    el.classList.add('is-split');
+  }
+
+  if (root.classList.contains('js-motion')) {
+    (window as unknown as { __motionReady: boolean }).__motionReady = true;
+
+    document
+      .querySelectorAll<HTMLElement>('.block-text > p, .text-image .text > p')
+      .forEach((p) => p.setAttribute('data-lines', ''));
+
+    const targets = document.querySelectorAll<HTMLElement>('.enter, [data-lines], [data-facts]');
+    document.fonts.ready.then(() => {
+      document.querySelectorAll<HTMLElement>('[data-lines]').forEach(splitLines);
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add('is-in');
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.15 },
+      );
+      targets.forEach((el) => observer.observe(el));
+    });
+  }
+
+  // Reading progress fallback where scroll timelines are not supported.
+  const progress = document.querySelector<HTMLElement>('[data-read-progress]');
+  if (progress && !CSS.supports('animation-timeline', 'scroll()')) {
+    let ticking = false;
+    const update = () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      progress.style.setProperty('--progress', String(max > 0 ? scrollY / max : 0));
+      ticking = false;
+    };
+    addEventListener('scroll', () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }, { passive: true });
+    update();
+  }
+</script>

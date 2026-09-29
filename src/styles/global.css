@@ -161,41 +161,42 @@ a:hover {
   }
 }
 
-/* Scroll reveal, like a sheet of tracing paper lifted from top to bottom. */
-@keyframes reveal-sheet {
-  from {
-    clip-path: inset(0 0 100% 0);
-    transform: translateY(24px);
-  }
-  to {
-    clip-path: inset(0);
-    transform: none;
-  }
-}
-
-@keyframes reveal-text {
-  from {
+/*
+ * Entrance motion (project pages). `js-motion` is set in <head> only when motion
+ * is allowed, so without JS or with reduced motion everything is simply visible.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion .enter {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(32px);
+    transition:
+      opacity 800ms var(--ease-out),
+      transform 800ms var(--ease-out);
+    transition-delay: calc(var(--n, 0) * 120ms);
   }
-  to {
+
+  .js-motion .enter.is-in {
     opacity: 1;
     transform: none;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .reveal {
-      animation: reveal-sheet linear both;
-      animation-timeline: view();
-      animation-range: entry calc(var(--n, 0) * 8%) entry calc(70% + var(--n, 0) * 8%);
-    }
+  /* Text rises line by line: words are wrapped in .w with a --line index. */
+  .js-motion [data-lines]:not(.is-split) {
+    opacity: 0;
+  }
 
-    .reveal-text {
-      animation: reveal-text linear both;
-      animation-timeline: view();
-      animation-range: entry 10% entry 80%;
-    }
+  .js-motion [data-lines] .w {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 600ms var(--ease-out),
+      transform 600ms var(--ease-out);
+    transition-delay: calc(var(--line, 0) * 90ms);
+  }
+
+  .js-motion [data-lines].is-in .w {
+    opacity: 1;
+    transform: none;
   }
 }

@@ -17,7 +17,8 @@
 | 變更 | 狀態 | 進度 | 說明 |
 |---|---|---|---|
 | `create-architecture-portfolio-site` | 已上線，收尾中 | 見下方 | 網站本體、內容、部署 |
-| `add-motion-and-uniform-covers` | 實作完成，等待擁有者在預覽網址確認 | 29/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
+| `add-motion-and-uniform-covers` | 實作完成；預覽回饋後部分需求由下一個變更取代 | 30/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
+| `refine-project-page-fidelity-and-motion` | OpenSpec 已完成，等待擁有者確認 | 0/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
 
 ## create-architecture-portfolio-site
 
@@ -54,11 +55,28 @@ OpenSpec：`openspec/changes/add-motion-and-uniform-covers/`（proposal、design
 - 驗證：減少動態模式全部停用；手機無橫向捲動；Lighthouse 行動版首頁 99、Dinner Theater 100、Hydrological 97，CLS ≤ 0.004；開場期間可點擊；鍵盤可開關圖面檢視器
 - 已知限制：Firefox 目前沒有捲動動畫與換頁轉場，顯示靜態版面
 
+預覽網址：https://hung-yung-r675q2t69-jeterchans-projects.vercel.app（commit `dc53ea2`）
+
 待完成：
 - 2.4 擁有者確認 5 張封面裁切
-- 8.5／8.6 在 Vercel 預覽網址確認後合併到 `main`
+- 8.6 在預覽網址確認後合併到 `main`
+
+## refine-project-page-fidelity-and-motion
+
+預覽回饋（2026-09-29）：
+- 專案頁封面滿版會放大低解析原圖，畫質下降 → 以畫質為優先
+- 專案頁動畫不明顯，只感覺到圖面藍框
+- 參考 micahhoang.com（經 wallofportfolios.in 嵌入）的進場動畫
+
+擁有者決定：
+- 畫質標準：圖片顯示寬度不超過原圖寬度（1x）
+- 新增：進場淡入上浮、文字逐行浮現、資訊表格線描出、圖面放大鏡、閱讀進度比例尺
+- 不採用：圖片框內視差、平滑慣性捲動、平面圖跑馬燈
+
+OpenSpec：`openspec/changes/refine-project-page-fidelity-and-motion/`（proposal、design、4 份 specs、tasks 共 24 項）。會取代前一變更的「sticky 縮放主視覺」與「隨捲動揭露」。
 
 ## 下一步
 
-1. 擁有者開啟 Vercel 預覽網址檢查動畫與封面裁切。
-2. 確認後合併 `feat/motion-and-covers` 到 `main`（自動上線）。
+1. 擁有者確認 `refine-project-page-fidelity-and-motion` 的 proposal 與 design。
+2. 在 `feat/motion-and-covers` 分支實作，推送後以新的預覽網址確認。
+3. 確認後合併到 `main`（兩個變更一起上線）。

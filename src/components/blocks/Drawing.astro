@@ -13,14 +13,15 @@ interface Props {
 const { image, alt, caption, lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Large version for the zoom viewer, sharp enough to read line weights.
+// Large version for the zoom viewer and loupe, sharp enough to read line weights.
 const zoomWidth = Math.min(image.width, 4000);
 const zoomHeight = Math.round((image.height * zoomWidth) / image.width);
 const zoom = await getImage({ src: image, width: zoomWidth, format: 'webp', quality: 90 });
-const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
+// Never above the source width; always include the source width itself.
+const widths = [...new Set([800, 1200, 1600, 2400].filter((w) => w < image.width).concat(Math.min(image.width, 2400)))];
 ---
 
-<figure class="drawing reveal">
+<figure class="drawing enter" style={`--natural-width: ${image.width}px`}>
   <a
     class="drawing-link"
     href={zoom.src}
@@ -28,16 +29,27 @@ const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
     data-pswp-height={zoomHeight}
     aria-label={`${t('project.enlarge')}: ${caption ?? alt}`}
     data-cursor-label={t('project.enlargeCursor')}
+    data-loupe-label={t('project.clickToEnlarge')}
   >
-    <Picture src={image} alt={alt} formats={['webp']} widths={widths.length ? widths : [image.width]} sizes="(max-width: 767px) 100vw, 90vw" loading="lazy" />
+    <Picture
+      src={image}
+      alt={alt}
+      formats={['webp']}
+      widths={widths}
+      sizes={`(max-width: 767px) calc(100vw - 2rem), min(90vw, ${image.width}px)`}
+      loading="lazy"
+    />
   </a>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
 <style>
   .drawing {
+    --sheet-pad: clamp(0.75rem, 2vw, 2rem);
+    /* The white sheet hugs the drawing: never wider than its source pixels. */
+    width: min(100%, calc(var(--natural-width) + 2 * var(--sheet-pad) + 2px));
     margin: 0;
-    padding: clamp(0.75rem, 2vw, 2rem);
+    padding: var(--sheet-pad);
     background: #fff;
     border: 1px solid var(--rule);
   }
@@ -84,6 +96,7 @@ const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
 
   .drawing :global(img) {
     width: 100%;
+    max-width: var(--natural-width);
     height: auto;
   }
 
@@ -118,23 +131,66 @@ const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
   });
   lightbox.init();
 
-  // "Enlarge" label that follows the pointer over drawings (mouse and trackpad only).
+  // Mouse and trackpad only: a loupe where the source has real extra detail,
+  // otherwise a small "Enlarge" label that follows the pointer.
+  const LOUPE_SIZE = 200;
+  const MIN_RATIO = 1.5;
+  const MAX_ZOOM = 2.5;
+
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     const label = document.createElement('div');
     label.className = 'cursor-label';
     label.setAttribute('aria-hidden', 'true');
-    document.body.append(label);
 
-    document.querySelectorAll<HTMLElement>('a.drawing-link').forEach((link) => {
+    const loupe = document.createElement('div');
+    loupe.className = 'loupe';
+    loupe.setAttribute('aria-hidden', 'true');
+    const loupeLabel = document.createElement('span');
+    loupeLabel.className = 'loupe-label';
+    loupe.append(loupeLabel);
+
+    document.body.append(label, loupe);
+
+    document.querySelectorAll<HTMLAnchorElement>('a.drawing-link').forEach((link) => {
+      const img = link.querySelector('img');
+      const sourceWidth = Number(link.dataset.pswpWidth);
+      let zoom = 0;
+
+      const hide = () => {
+        label.classList.remove('is-visible');
+        loupe.classList.remove('is-visible');
+      };
+
       link.addEventListener('pointerenter', () => {
-        label.textContent = link.dataset.cursorLabel ?? '';
-        label.classList.add('is-visible');
+        const shown = img?.getBoundingClientRect().width ?? 0;
+        const ratio = shown ? sourceWidth / shown : 0;
+        zoom = ratio >= MIN_RATIO ? Math.min(MAX_ZOOM, ratio) : 0;
+        if (zoom) {
+          // The large image is only fetched on the first hover.
+          loupe.style.backgroundImage = `url("${link.href}")`;
+          loupeLabel.textContent = link.dataset.loupeLabel ?? '';
+          loupe.classList.add('is-visible');
+        } else {
+          label.textContent = link.dataset.cursorLabel ?? '';
+          label.classList.add('is-visible');
+        }
       });
-      link.addEventListener('pointerleave', () => label.classList.remove('is-visible'));
+
       link.addEventListener('pointermove', (event) => {
-        label.style.transform = `translate(${event.clientX + 14}px, ${event.clientY + 14}px)`;
+        if (!zoom) {
+          label.style.transform = `translate(${event.clientX + 14}px, ${event.clientY + 14}px)`;
+          return;
+        }
+        const box = img!.getBoundingClientRect();
+        const x = event.clientX - box.left;
+        const y = event.clientY - box.top;
+        loupe.style.transform = `translate(${event.clientX - LOUPE_SIZE / 2}px, ${event.clientY - LOUPE_SIZE / 2}px)`;
+        loupe.style.backgroundSize = `${box.width * zoom}px ${box.height * zoom}px`;
+        loupe.style.backgroundPosition = `${LOUPE_SIZE / 2 - x * zoom}px ${LOUPE_SIZE / 2 - y * zoom}px`;
       });
-      link.addEventListener('click', () => label.classList.remove('is-visible'));
+
+      link.addEventListener('pointerleave', hide);
+      link.addEventListener('click', hide);
     });
   }
 </script>
@@ -154,12 +210,43 @@ const widths = [800, 1200, 1600, 2400].filter((w) => w <= image.width);
     opacity: 0;
   }
 
-  .cursor-label.is-visible {
+  .loupe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: 200px;
+    height: 200px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .loupe-label {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    padding: 0.2rem 0.45rem;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  .cursor-label.is-visible,
+  .loupe.is-visible {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .cursor-label {
+    .cursor-label,
+    .loupe {
       transition: opacity var(--dur-short) var(--ease-out);
     }
   }

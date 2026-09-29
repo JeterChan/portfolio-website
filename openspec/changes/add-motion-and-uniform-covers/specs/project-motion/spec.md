@@ -1,37 +1,14 @@
 ## ADDED Requirements
 
 ### Requirement: 專案封面主視覺
-專案頁頂端 SHALL 顯示該專案封面作為全寬主視覺；支援捲動驅動動畫時，封面 SHALL 固定於畫面（sticky）並隨捲動進度縮小，專案名稱與摘要隨之浮現，段落結束後接續專案資訊與內文。
+專案頁頂端 SHALL 顯示該專案封面作為主視覺，並作為首頁卡片換頁轉場的目標。封面的尺寸與進場方式依 `refine-project-page-fidelity-and-motion` 的 `image-fidelity` 與 `project-entrance-motion` 規格（2026-09-29 預覽回饋後取代原本的 sticky 縮放設計）。
 
-#### Scenario: 捲動主視覺
-- **WHEN** 訪客在專案頁頂端向下捲動
-- **THEN** 封面隨捲動逐漸縮小，標題浮現；停止捲動時動畫也停止在當下進度
-
-#### Scenario: 向上捲回
-- **WHEN** 訪客捲回頂端
-- **THEN** 封面恢復滿版，動畫反向
-
-#### Scenario: 不支援或減少動態
-- **WHEN** 瀏覽器不支援捲動驅動動畫，或訪客開啟減少動態
-- **THEN** 封面以一般靜態圖片呈現，不 sticky、不縮放
-
-#### Scenario: 手機瀏覽
-- **WHEN** 訪客以寬度小於 768px 的裝置開啟專案頁
-- **THEN** 封面以 3:2 靜態圖片呈現，不 sticky、不縮放
-
-### Requirement: 內容隨捲動揭露
-專案頁的圖片與圖面 SHALL 在進入畫面時隨捲動進度由上往下揭開；文字段落 SHALL 淡入並小幅上移；並排圖 SHALL 依序錯開揭露。載入時已在畫面內的內容 MUST 直接顯示。
-
-#### Scenario: 圖面進入畫面
-- **WHEN** 訪客捲動到一張圖面
-- **THEN** 圖面隨捲動逐漸揭開，完全進入畫面前已完整顯示
-
-#### Scenario: 並排圖
-- **WHEN** 三張並排圖進入畫面
-- **THEN** 由左至右依序揭開
+#### Scenario: 顯示封面
+- **WHEN** 訪客開啟任一專案頁
+- **THEN** 頁首顯示該專案封面、專案名稱與摘要
 
 ### Requirement: 圖面懸停提示
-在支援懸停的精確指標裝置上，滑鼠移到圖面時 SHALL 以強調色描出圖面框線，並顯示跟隨游標的「Enlarge」提示標籤；觸控裝置 MUST NOT 顯示此提示。
+在支援懸停的精確指標裝置上，滑鼠移到圖面時 SHALL 以強調色描出圖面框線，並顯示跟隨游標的「Enlarge」提示標籤（可放大細節的圖面改顯示放大鏡，見 `refine-project-page-fidelity-and-motion` 的 `drawing-loupe`）；觸控裝置 MUST NOT 顯示此提示。
 
 #### Scenario: 滑鼠移到圖面
 - **WHEN** 桌機訪客將滑鼠移到平面圖上
