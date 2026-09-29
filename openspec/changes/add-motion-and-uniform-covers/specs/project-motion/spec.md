@@ -8,7 +8,7 @@
 - **THEN** 頁首顯示該專案封面、專案名稱與摘要
 
 ### Requirement: 圖面懸停提示
-在支援懸停的精確指標裝置上，滑鼠移到圖面時 SHALL 以強調色描出圖面框線，並顯示跟隨游標的「Enlarge」提示標籤（可放大細節的圖面改顯示放大鏡，見 `refine-project-page-fidelity-and-motion` 的 `drawing-loupe`）；觸控裝置 MUST NOT 顯示此提示。
+在支援懸停的精確指標裝置上，滑鼠移到圖面時 SHALL 以強調色描出圖面框線，並顯示跟隨游標的「Enlarge」提示標籤（提示樣式已由 `replace-loupe-with-animated-cursor` 的 `drawing-cursor` 取代：所有圖面改為動畫圓圈游標）；觸控裝置 MUST NOT 顯示此提示。
 
 #### Scenario: 滑鼠移到圖面
 - **WHEN** 桌機訪客將滑鼠移到平面圖上

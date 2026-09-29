@@ -25,9 +25,9 @@
 
 ## 5. 圖面放大鏡
 
-- [x] 5.1 放大鏡元件：啟用條件（精確指標、倍率 ≥ 1.5）、倍率上限 2.5
-- [x] 5.2 大圖延遲載入、跟隨游標、點擊開啟 PhotoSwipe
-- [x] 5.3 不啟用放大鏡的圖面保留「Enlarge」標籤
+- [x] 5.1 （已由 replace-loupe-with-animated-cursor 取代）放大鏡元件：啟用條件（精確指標、倍率 ≥ 1.5）、倍率上限 2.5
+- [x] 5.2 （已由 replace-loupe-with-animated-cursor 取代）大圖延遲載入、跟隨游標、點擊開啟 PhotoSwipe
+- [x] 5.3 （已由 replace-loupe-with-animated-cursor 取代）不啟用放大鏡的圖面保留「Enlarge」標籤
 
 ## 6. 閱讀進度比例尺
 

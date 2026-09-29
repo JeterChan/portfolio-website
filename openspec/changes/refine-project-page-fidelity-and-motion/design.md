@@ -53,7 +53,7 @@
 - 格線改由偽元素繪製：橫線 `scaleX(0→1)`、直線 `scaleY(0→1)`，依格子順序錯開 60ms。格線完成後（約 500ms）內容淡入。
 - 未觸發動畫時格線照常顯示，與目前樣式一致。
 
-### D6. 圖面放大鏡
+### D6. 圖面放大鏡 — 已由 `replace-loupe-with-animated-cursor` 取代
 - 啟用條件：`(hover: hover) and (pointer: fine)`，且 `原圖寬 / 顯示寬 ≥ 1.5`。倍率 = `min(2.5, 原圖寬 / 顯示寬)`，確保放大鏡內不超過原圖解析度。整頁圖版（4000px）通常可啟用；原尺寸顯示的點陣平面圖不啟用，改顯示原本的「Enlarge」標籤。
 - 圓形直徑 200px，以 `background-image` 顯示放大用的大圖（沿用 PhotoSwipe 的 `href`，第一次滑入時才載入），`background-position` 跟隨游標。
 - 取代跟隨游標的「Enlarge」標籤。放大鏡邊框使用強調色，下方附小字「Click to enlarge」。

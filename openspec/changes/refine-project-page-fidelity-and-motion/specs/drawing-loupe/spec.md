@@ -1,6 +1,8 @@
 ## ADDED Requirements
 
 ### Requirement: 圖面放大鏡
+> 已由 `replace-loupe-with-animated-cursor` 取代（2026-09-29 擁有者要求改為動畫游標）。以下保留原需求紀錄。
+
 在支援懸停的精確指標裝置上，當圖面原圖寬度至少為顯示寬度的 1.5 倍時，滑鼠移到圖面上 SHALL 顯示跟隨游標的圓形放大鏡，呈現游標位置的細節。
 
 #### Scenario: 高解析圖版

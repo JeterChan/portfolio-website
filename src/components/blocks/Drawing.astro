@@ -13,7 +13,7 @@ interface Props {
 const { image, alt, caption, lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Large version for the zoom viewer and loupe, sharp enough to read line weights.
+// Large version for the zoom viewer, sharp enough to read line weights.
 const zoomWidth = Math.min(image.width, 4000);
 const zoomHeight = Math.round((image.height * zoomWidth) / image.width);
 const zoom = await getImage({ src: image, width: zoomWidth, format: 'webp', quality: 90 });
@@ -29,7 +29,6 @@ const widths = [...new Set([800, 1200, 1600, 2400].filter((w) => w < image.width
     data-pswp-height={zoomHeight}
     aria-label={`${t('project.enlarge')}: ${caption ?? alt}`}
     data-cursor-label={t('project.enlargeCursor')}
-    data-loupe-label={t('project.clickToEnlarge')}
   >
     <Picture
       src={image}
@@ -131,64 +130,56 @@ const widths = [...new Set([800, 1200, 1600, 2400].filter((w) => w < image.width
   });
   lightbox.init();
 
-  // Mouse and trackpad only: a loupe where the source has real extra detail,
-  // otherwise a small "Enlarge" label that follows the pointer.
-  const LOUPE_SIZE = 200;
-  const MIN_RATIO = 1.5;
-  const MAX_ZOOM = 2.5;
-
+  // Mouse and trackpad only: an animated ring cursor over drawings.
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const label = document.createElement('div');
-    label.className = 'cursor-label';
-    label.setAttribute('aria-hidden', 'true');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const cursor = document.createElement('div');
+    cursor.className = 'drawing-cursor';
+    cursor.setAttribute('aria-hidden', 'true');
+    cursor.innerHTML = '<span class="drawing-cursor-ring"><span class="drawing-cursor-plus"></span></span><span class="drawing-cursor-label"></span>';
+    const label = cursor.querySelector<HTMLElement>('.drawing-cursor-label')!;
+    document.body.append(cursor);
 
-    const loupe = document.createElement('div');
-    loupe.className = 'loupe';
-    loupe.setAttribute('aria-hidden', 'true');
-    const loupeLabel = document.createElement('span');
-    loupeLabel.className = 'loupe-label';
-    loupe.append(loupeLabel);
+    // Ease the ring toward the pointer; stop the loop once it has caught up.
+    const target = { x: 0, y: 0 };
+    const current = { x: 0, y: 0 };
+    let frame = 0;
+    const place = () => {
+      cursor.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
+    };
+    const follow = () => {
+      current.x += (target.x - current.x) * 0.2;
+      current.y += (target.y - current.y) * 0.2;
+      place();
+      if (Math.abs(target.x - current.x) > 0.1 || Math.abs(target.y - current.y) > 0.1) {
+        frame = requestAnimationFrame(follow);
+      } else {
+        frame = 0;
+      }
+    };
+    const moveTo = (x: number, y: number, snap = false) => {
+      target.x = x;
+      target.y = y;
+      if (snap || reduced.matches) {
+        current.x = x;
+        current.y = y;
+        place();
+      } else if (!frame) {
+        frame = requestAnimationFrame(follow);
+      }
+    };
 
-    document.body.append(label, loupe);
+    const hide = () => cursor.classList.remove('is-visible', 'is-pressed');
 
     document.querySelectorAll<HTMLAnchorElement>('a.drawing-link').forEach((link) => {
-      const img = link.querySelector('img');
-      const sourceWidth = Number(link.dataset.pswpWidth);
-      let zoom = 0;
-
-      const hide = () => {
-        label.classList.remove('is-visible');
-        loupe.classList.remove('is-visible');
-      };
-
-      link.addEventListener('pointerenter', () => {
-        const shown = img?.getBoundingClientRect().width ?? 0;
-        const ratio = shown ? sourceWidth / shown : 0;
-        zoom = ratio >= MIN_RATIO ? Math.min(MAX_ZOOM, ratio) : 0;
-        if (zoom) {
-          // The large image is only fetched on the first hover.
-          loupe.style.backgroundImage = `url("${link.href}")`;
-          loupeLabel.textContent = link.dataset.loupeLabel ?? '';
-          loupe.classList.add('is-visible');
-        } else {
-          label.textContent = link.dataset.cursorLabel ?? '';
-          label.classList.add('is-visible');
-        }
+      link.addEventListener('pointerenter', (event) => {
+        label.textContent = link.dataset.cursorLabel ?? '';
+        moveTo(event.clientX, event.clientY, true);
+        cursor.classList.add('is-visible');
       });
-
-      link.addEventListener('pointermove', (event) => {
-        if (!zoom) {
-          label.style.transform = `translate(${event.clientX + 14}px, ${event.clientY + 14}px)`;
-          return;
-        }
-        const box = img!.getBoundingClientRect();
-        const x = event.clientX - box.left;
-        const y = event.clientY - box.top;
-        loupe.style.transform = `translate(${event.clientX - LOUPE_SIZE / 2}px, ${event.clientY - LOUPE_SIZE / 2}px)`;
-        loupe.style.backgroundSize = `${box.width * zoom}px ${box.height * zoom}px`;
-        loupe.style.backgroundPosition = `${LOUPE_SIZE / 2 - x * zoom}px ${LOUPE_SIZE / 2 - y * zoom}px`;
-      });
-
+      link.addEventListener('pointermove', (event) => moveTo(event.clientX, event.clientY));
+      link.addEventListener('pointerdown', () => cursor.classList.add('is-pressed'));
+      link.addEventListener('pointerup', () => cursor.classList.remove('is-pressed'));
       link.addEventListener('pointerleave', hide);
       link.addEventListener('click', hide);
     });
@@ -196,58 +187,98 @@ const widths = [...new Set([800, 1200, 1600, 2400].filter((w) => w < image.width
 </script>
 
 <style is:global>
-  .cursor-label {
+  /* Ring cursor: positioned by transform on the outer box, scaled on the inner ring. */
+  .drawing-cursor {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 60;
-    padding: 0.3rem 0.55rem;
-    background: var(--accent);
-    color: #fff;
-    font-size: var(--step--1);
-    font-weight: 600;
     pointer-events: none;
-    opacity: 0;
   }
 
-  .loupe {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 60;
-    width: 200px;
-    height: 200px;
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    background-color: #fff;
-    background-repeat: no-repeat;
-    box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
-    pointer-events: none;
-    opacity: 0;
-  }
-
-  .loupe-label {
+  .drawing-cursor-ring {
     position: absolute;
-    top: calc(100% + 0.5rem);
+    top: -36px;
+    left: -36px;
+    width: 72px;
+    height: 72px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    background: rgb(36 64 200 / 0.08);
+    opacity: 0;
+    transform: scale(0.15);
+  }
+
+  /* The "+" at the centre. */
+  .drawing-cursor-plus::before,
+  .drawing-cursor-plus::after {
+    content: '';
+    position: absolute;
+    top: 50%;
     left: 50%;
-    padding: 0.2rem 0.45rem;
     background: var(--accent);
-    color: #fff;
+    transform: translate(-50%, -50%);
+  }
+
+  .drawing-cursor-plus::before {
+    width: 14px;
+    height: 1.5px;
+  }
+
+  .drawing-cursor-plus::after {
+    width: 1.5px;
+    height: 14px;
+  }
+
+  .drawing-cursor-plus,
+  .drawing-cursor-label {
+    opacity: 0;
+  }
+
+  .drawing-cursor-label {
+    position: absolute;
+    top: 44px;
+    left: 0;
+    color: var(--accent);
     font-size: 0.75rem;
     font-weight: 600;
     white-space: nowrap;
     transform: translateX(-50%);
   }
 
-  .cursor-label.is-visible,
-  .loupe.is-visible {
+  .drawing-cursor.is-visible .drawing-cursor-ring {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .drawing-cursor.is-visible.is-pressed .drawing-cursor-ring {
+    transform: scale(0.85);
+  }
+
+  .drawing-cursor.is-visible .drawing-cursor-plus,
+  .drawing-cursor.is-visible .drawing-cursor-label {
     opacity: 1;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .cursor-label,
-    .loupe {
-      transition: opacity var(--dur-short) var(--ease-out);
+    .drawing-cursor-ring {
+      transition:
+        transform 250ms var(--ease-out),
+        opacity 250ms var(--ease-out);
+    }
+
+    .drawing-cursor.is-visible .drawing-cursor-ring {
+      transition-duration: 350ms;
+    }
+
+    .drawing-cursor-plus,
+    .drawing-cursor-label {
+      transition: opacity 200ms var(--ease-out);
+    }
+
+    .drawing-cursor.is-visible .drawing-cursor-plus,
+    .drawing-cursor.is-visible .drawing-cursor-label {
+      transition-delay: 120ms;
     }
   }
 
