@@ -1,31 +1,39 @@
 ---
-name: Your Name
-role: Architectural designer
-location: Taipei, Taiwan
-summary: Architectural designer with a focus on public buildings and timber construction.
-email: hello@example.com
-links:
-  - label: LinkedIn
-    url: https://www.linkedin.com/
-  - label: Instagram
-    url: https://www.instagram.com/
+name: Hung Yung Fan
+location: Taiwan
+summary: Architecture portfolio of Hung Yung Fan. Selected works 2021–2023, National Taiwan University of Science and Technology.
+email: hungyungfan@gmail.com
+links: []
 ---
 
-Placeholder text. I’m an architecture graduate interested in how public buildings can hold everyday life. I work across physical models, drawings and full-scale prototypes.
+Hello, I’m Emily Hung. I enjoy taking part in new activities and I’m always willing to step out of my comfort zone and work with others.
+
+In the Scouts during high school, I found a passion for campsite construction: drawing layout plans, building models and constructing public facilities from bamboo. Turning 2D ideas into 3D structures fascinated me, and I still find great joy in making models by hand. That was what sparked my curiosity about architecture.
+
+In my first year at university I joined the USR Bamboo Construction Project, working with professors to exhibit and build bamboo structures in Chiayi. It showed me how architecture can blend with and transform its surroundings to create human-centred places, an idea I have carried into every project since.
 
 ## Education
 
-**B.Arch., Department of Architecture** — Placeholder University, 2020–2025
+**National Taiwan University of Science and Technology**, Department of Architecture, 2020–
+
+**Ching Cheng High School**, 2018–2020
 
 ## Experience
 
-**Intern** — Placeholder Architects, Summer 2024
-Worked on competition drawings and physical models for a library project.
+**Intern**, Bio-Architecture Formosana, July–September 2022
 
-## Skills
+## Workshops and competitions
 
-Rhino, Grasshopper, Revit, AutoCAD, Adobe Creative Suite, laser cutting, woodworking.
+- 2023 National Architects Association of the Republic of China Students Contest, Selected award
+- 2022 Bamboo Forest Iron Cenozoic Exhibition, Practical Achievement Gold Award
+- 2022 Training for Accessible Facilities and Equipment Design Inspection Personnel
+- 2021 USR Bamboo Construction Project
+- 2020 Tellus Home Design Competition, Selected award
 
-## Awards and exhibitions
+## Languages
 
-**Honourable mention** — Placeholder Student Competition, 2024
+TOEIC 890, TOEFL ITP 587, GEPT High-Intermediate, Advanced French course (128 hours)
+
+## Software
+
+AutoCAD, Revit, SketchUp, Rhino, Grasshopper, Lumion, Photoshop, Illustrator

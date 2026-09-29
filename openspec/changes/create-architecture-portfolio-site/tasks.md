@@ -71,7 +71,7 @@
 
 ## 11. 真實內容（PDF 到位後）
 
-- [ ] 11.1 確認 PDF 與原始圖檔：用 `pdfimages`/`pdftoppm`/文字擷取拆出素材到暫存資料夾
-- [ ] 11.2 依 PDF 建立各專案資料夾與 `index.en.md` 初稿，擁有者確認文字與圖序
-- [ ] 11.3 壓縮 PDF 作品集（< 20MB）放入 `public/portfolio.pdf`
+- [x] 11.1 確認 PDF 與原始圖檔：用 `pdfimages`/`pdftoppm`/文字擷取拆出素材到暫存資料夾
+- [x] 11.2 依 PDF 建立各專案資料夾與 `index.en.md` 初稿，擁有者確認文字與圖序
+- [x] 11.3 壓縮 PDF 作品集（< 20MB）放入 `public/portfolio.pdf`
 - [ ] 11.4 移除佔位內容、填入真實 profile，重跑第 9 節驗證後部署

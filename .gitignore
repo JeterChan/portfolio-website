@@ -7,3 +7,6 @@ dist/
 /.claude/settings.local.json
 /pdf-extract/
 /.playwright-mcp/
+
+# Source portfolio PDF (too large for git); the compressed copy lives in public/
+/*.pdf
