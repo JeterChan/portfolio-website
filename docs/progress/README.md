@@ -18,7 +18,7 @@
 |---|---|---|---|
 | `create-architecture-portfolio-site` | 已上線，收尾中 | 見下方 | 網站本體、內容、部署 |
 | `add-motion-and-uniform-covers` | 實作完成；預覽回饋後部分需求由下一個變更取代 | 30/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
-| `refine-project-page-fidelity-and-motion` | OpenSpec 已完成，等待擁有者確認 | 0/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
+| `refine-project-page-fidelity-and-motion` | 實作完成，等待擁有者在預覽網址確認 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
 
 ## create-architecture-portfolio-site
 
@@ -75,8 +75,16 @@ OpenSpec：`openspec/changes/add-motion-and-uniform-covers/`（proposal、design
 
 OpenSpec：`openspec/changes/refine-project-page-fidelity-and-motion/`（proposal、design、4 份 specs、tasks 共 24 項）。會取代前一變更的「sticky 縮放主視覺」與「隨捲動揭露」。
 
+實作（分支 `feat/motion-and-covers`，commit `764ca98`，2026-09-29）：
+- 畫質：專案頁 5 個專案共 47 張圖逐一檢查，顯示寬度都不超過原圖寬度。另修正小圖 srcset 只提供 480／800px 版本（也會造成放大）的問題
+- 封面：原比例、不超過原尺寸、高度上限 75svh；移除滿版 sticky 縮放；首頁轉場保留
+- 動畫：進場淡入上浮（取代捲動揭露）、標題／摘要／段落逐行浮現、資訊表格線描出、圖面放大鏡（倍率 ≤ 2.5 且不超過原圖解析度；解析度不足的圖面顯示 Enlarge）、頂端閱讀進度比例尺
+- 實作時的調整：封面不做淡入（轉場目標與主要內容，直接顯示）；進度條刻度改為淡灰
+- 驗證：減少動態與停用 JS 時內容完整；轉場抵達時封面可見；鍵盤可開關圖面；手機無橫向捲動；Lighthouse 行動版首頁 99、Dinner Theater 98、Hydrological 100，CLS 0
+
+預覽網址：https://hung-yung-ntaukhnrg-jeterchans-projects.vercel.app
+
 ## 下一步
 
-1. 擁有者確認 `refine-project-page-fidelity-and-motion` 的 proposal 與 design。
-2. 在 `feat/motion-and-covers` 分支實作，推送後以新的預覽網址確認。
-3. 確認後合併到 `main`（兩個變更一起上線）。
+1. 擁有者在預覽網址確認兩個變更（`add-motion-and-uniform-covers`、`refine-project-page-fidelity-and-motion`），包含首頁 5 張封面裁切。
+2. 確認後合併 `feat/motion-and-covers` 到 `main`（自動上線），並歸檔兩個 OpenSpec 變更。
