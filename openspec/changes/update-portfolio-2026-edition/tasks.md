@@ -31,5 +31,5 @@
 - [x] 5.1 build／check 通過；逐頁檢查圖片不超過原圖寬度
 - [x] 5.2 中文專案：`lang` 屬性、字型、逐行浮現與換行
 - [x] 5.3 Lighthouse 行動版首頁與兩個專案頁 Performance ≥ 90、CLS < 0.1
-- [ ] 5.4 推送分支，提供 Vercel 預覽網址
+- [x] 5.4 推送分支，提供 Vercel 預覽網址
 - [ ] 5.5 擁有者確認後合併 `main` 上線、歸檔，更新 `docs/progress`

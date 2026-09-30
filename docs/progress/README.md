@@ -20,7 +20,7 @@
 | `add-motion-and-uniform-covers` | 已上線、已歸檔 | 32/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
 | `refine-project-page-fidelity-and-motion` | 已上線、已歸檔 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
 | `replace-loupe-with-animated-cursor` | 已上線、已歸檔 | 13/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
-| `update-portfolio-2026-edition` | OpenSpec 已完成，等待擁有者確認與提供年份 | 0/21 | 依新版 PDF 更新 7 個專案、CV、PDF 下載；中文內容支援 |
+| `update-portfolio-2026-edition` | 實作完成，等待擁有者在預覽網址確認 | 19/21 | 依新版 PDF 更新 7 個專案、CV、PDF 下載；中文內容支援 |
 
 ## create-architecture-portfolio-site
 
@@ -116,7 +116,20 @@ OpenSpec：`openspec/changes/replace-loupe-with-animated-cursor/`（proposal、d
 
 OpenSpec：`openspec/changes/update-portfolio-2026-edition/`（proposal、design、2 份 spec、tasks 共 21 項）。
 
+實作（分支 `feat/portfolio-2026-edition`，commit `dfd20f0`）：
+- 7 個專案依新版 PDF 重建（既有 5 個網址不變）；新增 small-town-old-lanes、bamboo-forest-iron-cenozoic
+- 中文內容：`lang: zh-Hant` 標記、系統中文字型、行高 1.8；逐行浮現改用 `Intl.Segmenter`，中文可逐行出現且換行不變
+- CV 更新；聯絡方式為新 email 與 LinkedIn
+- PDF 下載：150dpi 壓縮約 20MB（200dpi 為 30.9MB）
+- 擷取注意：新版照片為 Adobe CMYK JPEG，需用 `pdfimages -png` 才能正確轉色
+- 驗證：7 個專案共 60 張圖皆不超過原圖寬度；Lighthouse 行動版首頁 99、小城故巷多 98、構竹浮雲 99，CLS 0
+- 待擁有者確認：
+  - 構竹浮雲的材料清單在 PDF 中被截斷（「and pipe wre…」），網站暫時只列竹、麻繩、旋轉扣件
+  - 小城故巷多內文引用「Edmond Beckon《Design of City》」，照原文保留（一般譯名為 Edmund Bacon《Design of Cities》）
+
+預覽網址：https://hung-yung-7j1sgc8fu-jeterchans-projects.vercel.app
+
 ## 下一步
 
-1. 擁有者確認 `update-portfolio-2026-edition`，並提供 7 個專案的年份。
-2. 實作後提供預覽網址，確認後上線。
+1. 擁有者在預覽網址確認新版內容，以及上述兩點文字。
+2. 確認後合併 `main` 上線並歸檔；年份待擁有者後續提供。
