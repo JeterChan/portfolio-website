@@ -36,7 +36,7 @@ const sizes = '(max-width: 767px) calc(100vw - 2rem), clamp(21rem, 60svh, 36rem)
       />
     </span>
     <span class="card-caption">
-      <span class="card-title"><span class="card-title-text">{title}</span></span>
+      <span class="card-title" lang={project.entry.data.lang}><span class="card-title-text">{title}</span></span>
       <span class="card-year">{year}</span>
       {studio && <span class="card-studio">{studio}</span>}
     </span>

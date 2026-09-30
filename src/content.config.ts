@@ -36,6 +36,11 @@ const projects = defineCollection({
       instructor: z.string().optional(),
       collaborators: z.union([z.string(), z.array(z.string())]).optional(),
       order: z.number().optional(),
+      // Content language when it differs from the page, e.g. "zh-Hant".
+      lang: z
+        .string()
+        .regex(/^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/, 'lang 需為語言代碼，例如 zh-Hant')
+        .optional(),
       draft: z.boolean().default(false),
     }),
 });

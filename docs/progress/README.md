@@ -1,6 +1,6 @@
 # 開發進度
 
-最後更新：2026-09-29
+最後更新：2026-09-30
 
 正式網站：https://hung-yung-fan.vercel.app
 原始碼：https://github.com/JeterChan/portfolio-website（推送到 `main` 會自動部署）
@@ -20,6 +20,7 @@
 | `add-motion-and-uniform-covers` | 已上線、已歸檔 | 32/32 | 封面統一尺寸、首頁開場、捲動動畫、換頁轉場、圖面互動 |
 | `refine-project-page-fidelity-and-motion` | 已上線、已歸檔 | 24/24 | 專案頁畫質上限、進場動畫、逐行文字、格線描出、放大鏡、閱讀進度 |
 | `replace-loupe-with-animated-cursor` | 已上線、已歸檔 | 13/13 | 圖面放大鏡改為動畫游標（圓圈放大附 +） |
+| `update-portfolio-2026-edition` | OpenSpec 已完成，等待擁有者確認與提供年份 | 0/21 | 依新版 PDF 更新 7 個專案、CV、PDF 下載；中文內容支援 |
 
 ## create-architecture-portfolio-site
 
@@ -103,9 +104,19 @@ OpenSpec：`openspec/changes/replace-loupe-with-animated-cursor/`（proposal、d
 - 2026-09-29：擁有者確認預覽後，`feat/motion-and-covers` 合併到 `main`（commit `4409b64`），Vercel 正式部署完成。已確認正式網站首頁封面 540×360、專案頁封面不超過原尺寸、動畫游標與閱讀進度比例尺皆生效、PDF 下載正常。
 - 三個變更已歸檔到 `openspec/changes/archive/`，規格併入 `openspec/specs/`（`drawing-loupe` 已被 `drawing-cursor` 取代，未保留在主規格中）。
 
+## update-portfolio-2026-edition
+
+新版作品集 `作品集.pdf`（78 頁，2026-09-30）：新增「01 小城故巷多」「06 構竹浮雲」；既有專案新增渲染與圖版頁；模型作品新增 Composition in Red, Blue, and Yellow；CV 大幅更新。
+
+擁有者決定：
+- 01 保留中文說明
+- 公開新 email（hungyungfan2@gmail.com）與 LinkedIn；不公開 Issuu、電話、生日、照片
+- 年份由擁有者提供（尚未提供）
+- 先給預覽網址，確認後上線
+
+OpenSpec：`openspec/changes/update-portfolio-2026-edition/`（proposal、design、2 份 spec、tasks 共 21 項）。
+
 ## 下一步
 
-目前沒有進行中的變更，所有 OpenSpec 變更都已歸檔。
-
-待擁有者提供：
-- 前 4 個專案的年份（目前顯示 `TBC`，也就是 To Be Confirmed）
+1. 擁有者確認 `update-portfolio-2026-edition`，並提供 7 個專案的年份。
+2. 實作後提供預覽網址，確認後上線。

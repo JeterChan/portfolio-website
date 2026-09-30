@@ -73,7 +73,7 @@ const showNeighbours = previous.slug !== project.slug;
         pictureAttributes={{ class: 'hero-picture' }}
       />
     </div>
-    <div class="hero-caption">
+    <div class="hero-caption" lang={data.lang}>
       <h1 id="project-title" data-lines>{data.title}</h1>
       {data.summary && <p class="summary" data-lines>{data.summary}</p>}
     </div>
@@ -93,7 +93,7 @@ const showNeighbours = previous.slug !== project.slug;
       </dl>
     </header>
 
-    <div class="project-body" data-project-body>
+    <div class="project-body" data-project-body lang={data.lang}>
       {
         blocks.map((block) => {
           switch (block.type) {
@@ -427,15 +427,27 @@ const showNeighbours = previous.slug !== project.slug;
   // text line by line, and the facts table traced. Only runs with html.js-motion.
   const root = document.documentElement;
 
+  const CJK = /[\u3000-\u30ff\u3400-\u9fff\uf900-\ufaff\uff00-\uffef]/;
+
+  /** Split text into words; CJK text has no spaces, so segment by language. */
+  function segments(text: string, lang: string): string[] {
+    if ('Segmenter' in Intl) {
+      const segmenter = new Intl.Segmenter(lang || 'en', { granularity: 'word' });
+      return Array.from(segmenter.segment(text), (part) => part.segment);
+    }
+    // Fallback: spaces for Latin text, one piece per CJK character.
+    return text.split(/(\s+)/).flatMap((part) => (CJK.test(part) ? Array.from(part) : [part]));
+  }
+
   /** Wrap each word in a span and number the visual lines it falls on. */
   function splitLines(el: HTMLElement) {
+    const lang = el.closest<HTMLElement>('[lang]')?.lang ?? 'en';
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     const nodes: Text[] = [];
     while (walker.nextNode()) nodes.push(walker.currentNode as Text);
     for (const node of nodes) {
-      const parts = node.textContent?.split(/(\s+)/) ?? [];
       const fragment = document.createDocumentFragment();
-      for (const part of parts) {
+      for (const part of segments(node.textContent ?? '', lang)) {
         if (!part) continue;
         if (/^\s+$/.test(part)) {
           fragment.append(part);

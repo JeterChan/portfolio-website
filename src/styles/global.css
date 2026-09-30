@@ -39,6 +39,19 @@
   --dur-long: 700ms;
 }
 
+/* Chinese content inside the English site: system CJK fonts after Archivo, no wide axis. */
+[lang|='zh'] {
+  --font: 'Archivo Variable', 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --font-display: var(--font);
+  --wide: 100;
+  font-family: var(--font);
+}
+
+[lang|='zh'] p,
+[lang|='zh'] li {
+  line-height: 1.8;
+}
+
 *,
 *::before,
 *::after {
